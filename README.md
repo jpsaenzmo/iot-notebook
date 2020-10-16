@@ -1,6 +1,6 @@
 # iot-notebook
 
-![Github Actions Status](https://git.elite.polito.it/iot-notebook/iot-notebook.git/workflows/Build/badge.svg)
+```![Github Actions Status](https://git.elite.polito.it/iot-notebook/iot-notebook.git/workflows/Build/badge.svg)
 
 IoT Notebook Jupyter Lab extension
 
