@@ -55,10 +55,17 @@ class LeftWidget extends Widget {
   }
 
   render() {
-    return <HelloMessage />
+    return <div style={{
+      background: "#FFFFFF",
+      color: "#000000",
+      fontFamily: "Helvetica",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column"
+    }}>Hola Mundo</div>
   }
 }
-
+/*
 class HelloMessage extends React.Component {
 
   render() {
@@ -69,3 +76,4 @@ class HelloMessage extends React.Component {
     );
   }
 }
+*/
