@@ -1,7 +1,8 @@
 import {
   ILabShell,
   JupyterFrontEnd,
-  JupyterFrontEndPlugin
+  JupyterFrontEndPlugin,
+  ILayoutRestorer
 } from '@jupyterlab/application';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -10,11 +11,11 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { Widget } from '@lumino/widgets';
-
 import { LabIcon } from '@jupyterlab/ui-components';
 
 import iotIconSvgStr from '../style/icons/iot.svg';
+
+import { ReactWidget } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
@@ -29,22 +30,22 @@ export const iotIcon = new LabIcon({
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook',
   autoStart: true,
-  requires: [ICommandPalette, IMainMenu, ILabShell],
+  requires: [ICommandPalette, IMainMenu, ILabShell, ILayoutRestorer],
   optional: [ILauncher],
   activate: (app: JupyterFrontEnd, palette: ICommandPalette,
-    mainMenu: IMainMenu, launcher: ILauncher, labShell: ILabShell) => {
+    mainMenu: IMainMenu, launcher: ILauncher, labShell: ILabShell, restorer: ILayoutRestorer) => {
     console.log('JupyterLab extension iot-notebook is activated!');
 
     const { shell } = app;
 
-    const leftWidget = new LeftWidget();
-    shell.add(leftWidget, 'left');
+    const content = new LeftWidget();
+    shell.add(content, 'left');
   }
 };
 
 export default extension;
 
-class LeftWidget extends Widget {
+class LeftWidget extends ReactWidget {
   constructor() {
     super();
     this.addClass('jp-example-view');
@@ -56,18 +57,19 @@ class LeftWidget extends Widget {
 
   render() {
     return <div style={{
+      overflow: "auto",
       background: "#FFFFFF",
       color: "#000000",
       fontFamily: "Helvetica",
       height: "100%",
       display: "flex",
       flexDirection: "column"
-    }}>Hola Mundo</div>
+    }}><h3>IoT Notebook</h3></div>
   }
 }
+
 /*
 class HelloMessage extends React.Component {
-
   render() {
     return (
       <div>
