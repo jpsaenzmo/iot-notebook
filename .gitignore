@@ -2,6 +2,6 @@
 lib/
 node_modules/
 *.egg-info/
-.ipynb
+*.ipynb
 .ipynb_checkpoints
 *.tsbuildinfo
