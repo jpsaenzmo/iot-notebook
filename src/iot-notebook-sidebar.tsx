@@ -44,19 +44,19 @@ export class IoTSideBar extends ReactWidget {
             <CollapsibleSection key="app-section" header='Application and cloud services' disabled={false}>
                 <div className="jp-iotsidebar-disclaimer">
                     <div>
-                        {}
+                        {'The cloud services manage the devices, acquire and store the data, and provide real-time and/or offline data analytics. Applications range from web-based dashboards to domain-specific web and mobile applications'}
                     </div></div>
             </CollapsibleSection>
             <CollapsibleSection key="devices-section" header='Devices' disabled={false}>
                 <div className="jp-iotsidebar-disclaimer">
                     <div>
-                        {}
+                        {'Devices comprise hardware to collect sensor data (sensing devices) or perform actions (acting devices)'}
                     </div></div>
             </CollapsibleSection>
             <CollapsibleSection key="gateway-section" header='Gateway' disabled={false}>
                 <div className="jp-iotsidebar-disclaimer">
                     <div>
-                        {}
+                        {'Gateways collect, preprocess, and forward the data coming from the sensing devices to the cloud, and vice-versa with the requests sent from the cloud to the acting devices'}
                     </div></div>
             </CollapsibleSection></>
     }
