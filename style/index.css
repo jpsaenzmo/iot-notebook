@@ -4,3 +4,4 @@
 @import url('~@jupyterlab/application/style/index.css');
 
 @import url('./iotsidebar.css');
+@import url('./iotcell.css');

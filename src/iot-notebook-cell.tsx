@@ -10,7 +10,7 @@ import {
     NotebookActions
 } from '@jupyterlab/notebook';
 
-import { ICellFooter } from '@jupyterlab/cells';
+import { ICellFooter, Cell } from '@jupyterlab/cells';
 
 import { CommandRegistry } from '@lumino/commands';
 
@@ -29,7 +29,7 @@ export function activateCommands(
     app: JupyterFrontEnd,
     tracker: INotebookTracker
 ): Promise<void> {
-    // tslint:disable-next-line:no-console
+
     console.log('JupyterLab extension jupyterlab-cellcodebtn is activated!');
 
     Promise.all([app.restored]).then(([params]) => {
@@ -61,7 +61,6 @@ export function activateCommands(
                 if (current) {
                     const { context, content } = current;
                     NotebookActions.run(content, context.sessionContext);
-                    // current.content.mode = 'edit';
                 }
             },
             isEnabled
@@ -74,7 +73,7 @@ export function activateCommands(
 /**
  * Extend default implementation of a cell footer.
  */
-export class CellFooterWithButton extends ReactWidget implements ICellFooter {
+class CellFooterWithButton extends ReactWidget implements ICellFooter {
     /**
      * Construct a new cell footer.
      */
@@ -89,6 +88,10 @@ export class CellFooterWithButton extends ReactWidget implements ICellFooter {
     render() {
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
+                <input type="checkbox" id="cb:prerequisite" name="prerequisite" value="isPrerequisite" />
+                <label htmlFor="cb:prerequisite">Is prerequisite</label><span />
+                <input type="checkbox" id="cb:linked" name="linked" value="isLinked" />
+                <label htmlFor="cb:linked">To be executed together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     onClick={event => {
@@ -102,4 +105,23 @@ export class CellFooterWithButton extends ReactWidget implements ICellFooter {
     }
 }
 
-export default CellFooterWithButton;
+/**
+ * Extend the default implementation of an `IContentFactory`.
+ */
+export class ContentFactoryWithFooterButton extends NotebookPanel.ContentFactory {
+    constructor(
+        commands: CommandRegistry,
+        options?: Cell.ContentFactory.IOptions | undefined
+    ) {
+        super(options);
+        this.commands = commands;
+    }
+    /**
+     * Create a new cell header for the parent widget.
+     */
+    createCellFooter(): ICellFooter {
+        return new CellFooterWithButton(this.commands);
+    }
+
+    private readonly commands: CommandRegistry;
+}

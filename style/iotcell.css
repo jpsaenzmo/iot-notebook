@@ -1,5 +1,6 @@
 .jp-Cell .iotcell-cellFooterContainer {
-  display: flex;
+  text-align: right;
+  margin: 0.2rem 0;
 }
 
 .jp-Cell .iotcell-cellFooterBtn {
