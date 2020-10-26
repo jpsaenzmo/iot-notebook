@@ -30,8 +30,6 @@ export function activateCommands(
     tracker: INotebookTracker
 ): Promise<void> {
 
-    console.log('JupyterLab extension jupyterlab-cellcodebtn is activated!');
-
     Promise.all([app.restored]).then(([params]) => {
         const { commands, shell } = app;
 

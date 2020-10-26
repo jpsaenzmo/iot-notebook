@@ -5,17 +5,11 @@ import * as React from 'react';
 import { ToolbarButtonComponent } from '@jupyterlab/apputils';
 
 import {
-    LabIcon, Collapse, caretDownIcon,
+    Collapse, caretDownIcon,
     caretRightIcon,
 } from '@jupyterlab/ui-components';
 
-
-export const iotIcon = new LabIcon({
-    name: 'defaultpkg:iot',
-    svgstr: iotIconSvgStr
-});
-
-import iotIconSvgStr from '../style/icons/iot.svg';
+import { iotIcon } from './index'
 
 /**
  * Icons with custom styling bound.

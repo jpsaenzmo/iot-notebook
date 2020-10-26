@@ -21,15 +21,32 @@ import { IoTSideBar } from './iot-notebook-sidebar';
 
 import { ContentFactoryWithFooterButton, activateCommands } from './iot-notebook-cell'
 
+import { ButtonExtension } from './iot-notebook-toolbar'
+
+import { LabIcon } from '@jupyterlab/ui-components';
+
+export const iotIcon = new LabIcon({
+  name: 'defaultpkg:iot',
+  svgstr: iotIconSvgStr
+});
+
+export const iotaeIcon = new LabIcon({
+  name: 'defaultpkg:iot-ae',
+  svgstr: iotIconAESvgStr
+});
+
+import iotIconSvgStr from '../style/icons/iot.svg';
+import iotIconAESvgStr from '../style/icons/iot-ae.svg';
+
 /**
  * Initialization data for the iot-notebook:sidebar extension.
  */
 const iotsidebar: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:sidebar',
-  autoStart: true,
   requires: [ICommandPalette, IMainMenu, ILabShell],
   optional: [ILauncher],
   provides: NotebookPanel.IContentFactory,
+  autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension iot-notebook:sidebar is activated!');
 
@@ -44,11 +61,11 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
  */
 const iotcell: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: 'iot-notebook:cell',
-  provides: NotebookPanel.IContentFactory,
   requires: [IEditorServices],
+  provides: NotebookPanel.IContentFactory,
   autoStart: true,
   activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
-    // tslint:disable-next-line:no-console
+
     console.log('JupyterLab extension iot-notebook:cell is activated!');
 
     const { commands } = app;
@@ -58,7 +75,7 @@ const iotcell: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 };
 
 /**
- * The fooet button extension for the code cell.
+ * The footer button extension for the IoT Code Cell.
  */
 const iotcellfooter: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:cellfooter',
@@ -68,12 +85,26 @@ const iotcellfooter: JupyterFrontEndPlugin<void> = {
 };
 
 /**
+ * Initialization data for the iot-notebook:toolbar extension.
+ */
+const iottoolbar: JupyterFrontEndPlugin<void> = {
+  id: 'iot-notebook:toolbar',
+  autoStart: true,
+  activate: (app: JupyterFrontEnd) => {
+    console.log('JupyterLab extension iot-notebook:toolbar is activated!');
+
+    app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
+  }
+}
+
+/**
  * Export the plugins as default.
  */
 const plugins: Array<JupyterFrontEndPlugin<any>> = [
   iotsidebar,
   iotcell,
-  iotcellfooter
+  iotcellfooter,
+  iottoolbar
 ];
 
 export default plugins;
