@@ -6,7 +6,7 @@ import {
 
 import {
   NotebookPanel,
-  INotebookTracker
+  INotebookTracker,
 } from '@jupyterlab/notebook';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -21,7 +21,7 @@ import { IoTSideBar } from './iot-notebook-sidebar';
 
 import { ContentFactoryWithFooterButton, activateCommands } from './iot-notebook-cell'
 
-import { ButtonExtension } from './iot-notebook-toolbar'
+import { IoTToolbar } from './iot-notebook-toolbar'
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
@@ -45,7 +45,6 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:sidebar',
   requires: [ICommandPalette, IMainMenu, ILabShell],
   optional: [ILauncher],
-  provides: NotebookPanel.IContentFactory,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension iot-notebook:sidebar is activated!');
@@ -92,8 +91,7 @@ const iottoolbar: JupyterFrontEndPlugin<void> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension iot-notebook:toolbar is activated!');
-
-    app.docRegistry.addWidgetExtension('Notebook', new ButtonExtension());
+    app.docRegistry.addWidgetExtension('Notebook', new IoTToolbar());
   }
 }
 
