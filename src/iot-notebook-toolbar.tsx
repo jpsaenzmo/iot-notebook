@@ -39,6 +39,8 @@ const IOTTOOLBAR_ARCHITECTURAL_CLASS = 'jp-Notebook-toolbarCellType';
  */
 const IOTTOOLBAR_ARCHITECTURAL_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
+const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
+
 /**
  * A notebook widget extension that adds a button to the toolbar.
  */
@@ -47,14 +49,14 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
     /**
      * Create a new extension object.
      */
-    createNew(panel: NotebookPanel, context: DocumentRegistry.IContext<INotebookModel>): IDisposable {
+    createNew(panel: NotebookPanel): IDisposable {
 
         let button = new ToolbarButton({
             className: 'myButton',
             label: 'IoT Architectural Element',
         });
 
-        let switchIoT = new IoTArchitecturalSwitch(panel.content, context);
+        let switchIoT = new IoTArchitecturalSwitch(panel.content);
 
         panel.toolbar.insertItem(11, 'lblIoTAE', button);
         panel.toolbar.insertAfter('lblIoTAE', 'switchIoTAE', switchIoT);
@@ -67,12 +69,12 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
 
 export class IoTArchitecturalSwitch extends ReactWidget {
 
-    constructor(widget: Notebook, context: DocumentRegistry.IContext<INotebookModel>, translator?: ITranslator) {
+    constructor(widget: Notebook, translator?: ITranslator) {
         super();
         this._trans = (translator || nullTranslator).load('jupyterlab');
         this.addClass(IOTTOOLBAR_ARCHITECTURAL_CLASS);
         this._notebook = widget;
-        this.context = context;
+        widget.stateChanged.connect(this.update, this);
     }
 
     /**
@@ -80,28 +82,21 @@ export class IoTArchitecturalSwitch extends ReactWidget {
      */
     handleChange = (event: React.ChangeEvent<HTMLSelectElement>): void => {
         if (event.target.value !== '-') {
-            this.context.model.metadata.set('architectural-element', event.target.value);
-            this._notebook.activate();
-        }
-    };
-
-    /**
-     * Handle `keydown` events for the HTMLSelect component.
-     */
-    handleKeyDown = (event: React.KeyboardEvent): void => {
-        if (event.keyCode === 13) {
+            this._notebook.model.metadata.set(ARCHITECTURAL_ELEMENT_KEY, event.target.value);
+            this.update();
             this._notebook.activate();
         }
     };
 
     render() {
         let value = '-';
-
+        if (this._notebook.model.metadata.get(ARCHITECTURAL_ELEMENT_KEY) != null) {
+            value = this._notebook.model.metadata.get(ARCHITECTURAL_ELEMENT_KEY).toString();
+        }
         return (
             <HTMLSelect
                 className={IOTTOOLBAR_ARCHITECTURAL_DROPDOWN_CLASS}
                 onChange={this.handleChange}
-                onKeyDown={this.handleKeyDown}
                 value={value}
                 aria-label={this._trans.__('IoT Architectural Element')}
             >
@@ -115,5 +110,4 @@ export class IoTArchitecturalSwitch extends ReactWidget {
 
     private _trans: TranslationBundle;
     private _notebook: Notebook;
-    public context: DocumentRegistry.IContext<INotebookModel> = null;
 }
