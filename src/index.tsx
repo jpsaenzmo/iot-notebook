@@ -7,6 +7,8 @@ import {
 import {
   NotebookPanel,
   INotebookTracker,
+  //INotebookTools,
+  //INotebookTools,
 } from '@jupyterlab/notebook';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -15,11 +17,11 @@ import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
 
-import { IEditorServices } from '@jupyterlab/codeeditor';
+//import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IoTSideBar } from './iot-notebook-sidebar';
 
-import { ContentFactoryWithFooterButton, activateCommands } from './iot-notebook-cell'
+import { ContentFactoryWithFooterButton, activateCommands } from './iot-notebook-cell' //
 
 import { IoTToolbar } from './iot-notebook-toolbar'
 
@@ -60,28 +62,31 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
  */
 const iotcell: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: 'iot-notebook:cell',
-  requires: [IEditorServices],
+  // requires: [IEditorServices, INotebookTools],
   provides: NotebookPanel.IContentFactory,
   autoStart: true,
-  activate: (app: JupyterFrontEnd, editorServices: IEditorServices) => {
+  //, editorServices: IEditorServices
+  activate: (app: JupyterFrontEnd) => {
 
     console.log('JupyterLab extension iot-notebook:cell is activated!');
 
     const { commands } = app;
-    const editorFactory = editorServices.factoryService.newInlineEditor;
-    return new ContentFactoryWithFooterButton(commands, { editorFactory });
+    // const editorFactory = editorServices.factoryService.newInlineEditor;
+    // { editorFactory }
+    return new ContentFactoryWithFooterButton(commands);
   }
 };
 
 /**
  * The footer button extension for the IoT Code Cell.
- */
+*/
 const iotcellfooter: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:cellfooter',
+  requires: [INotebookTracker],
   autoStart: true,
-  activate: activateCommands,
-  requires: [INotebookTracker]
+  activate: activateCommands
 };
+ 
 
 /**
  * Initialization data for the iot-notebook:toolbar extension.
@@ -101,8 +106,8 @@ const iottoolbar: JupyterFrontEndPlugin<void> = {
 const plugins: Array<JupyterFrontEndPlugin<any>> = [
   iotsidebar,
   iotcell,
-  iotcellfooter,
-  iottoolbar
+  iottoolbar,
+  iotcellfooter
 ];
 
 export default plugins;

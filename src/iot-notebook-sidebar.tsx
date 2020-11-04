@@ -23,6 +23,9 @@ const caretRightIconStyled = caretRightIcon.bindprops({
     width: '20px'
 });
 
+/**
+ * A notebook widget extension that adds a button to the sidebar.
+ */
 export class IoTSideBar extends ReactWidget {
     constructor() {
         super();

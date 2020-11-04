@@ -44,7 +44,7 @@ const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
 /**
  * A notebook widget extension that adds a button to the toolbar.
  */
-export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+export class  IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
 
     /**
      * Create a new extension object.

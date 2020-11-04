@@ -7,7 +7,9 @@ import {
 import {
     INotebookTracker,
     NotebookPanel,
-    NotebookActions
+    NotebookActions,
+    //NotebookTracker,
+    //Notebook
 } from '@jupyterlab/notebook';
 
 import { ICellFooter, Cell } from '@jupyterlab/cells';
@@ -17,6 +19,8 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { ReactWidget } from '@jupyterlab/apputils';
+
+// import { Notebook } from '@jupyterlab/notebook';
 
 /**
  * The CSS classes added to the cell footer.
@@ -32,7 +36,7 @@ export function activateCommands(
 
     Promise.all([app.restored]).then(([params]) => {
         const { commands, shell } = app;
-
+        console.log('Entra a activate commands')
         function getCurrent(args: ReadonlyPartialJSONObject): NotebookPanel | null {
             const widget = tracker.currentWidget;
             const activate = args.activate !== false;
@@ -63,6 +67,45 @@ export function activateCommands(
             },
             isEnabled
         });
+
+        commands.addCommand('set-as-prerequisite', {
+            label: 'Is prerequisite',
+            execute: args => {
+                //console.log('Entra al command ', args.state);
+                const current = getCurrent(args);
+
+                if (current) {
+                    const { content } = current;
+                    content.activeCell.model.metadata.set('is_prerequisite', args.state);
+                    content.activeCell
+                    content.update();
+                }
+            },
+            isEnabled
+        });
+
+        commands.addCommand('recibir-senal', {
+            label: 'Is prerequisite',
+            execute: args => {
+                console.log('Entra al recibir senal ');
+                const current = getCurrent(args);
+
+                if (current) {
+                    //const { content } = current;
+                    if (current.model == null) {
+                        console.log('Model es null');
+                    }
+                    if (current.model != null) {
+                        current.model.metadata.get('is_prerequisite');
+                        console.log('Hola perro: ', current.model.metadata.get('is_prerequisite'));
+                    }
+
+                    //current.update();
+                    //console.log('Current nodehjkkjhkj: ', content.);
+                }
+            },
+            isEnabled
+        });
     });
 
     return Promise.resolve();
@@ -72,6 +115,11 @@ export function activateCommands(
  * Extend default implementation of a cell footer.
  */
 class CellFooterWithButton extends ReactWidget implements ICellFooter {
+
+    private isPrerequisite: boolean;
+
+    // private _notebook: Notebook;
+
     /**
      * Construct a new cell footer.
      */
@@ -79,17 +127,33 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         super();
         this.addClass(CELL_FOOTER_CLASS);
         this.commands = commands;
+        this.isPrerequisite = false;
     }
 
     private readonly commands: CommandRegistry;
 
     render() {
+        console.log('Entra al render');
+
+        if (this.commands.isEnabled('recibir-senal')) {
+            console.log('recibir senal is enabled');
+            this.commands.execute('recibir-senal', { state: this.isPrerequisite });
+        }
+        /*
+        if (this._notebook.activeCell.model.metadata.get('is_prerequisite') == true) {
+            this.isPrerequisite = true
+        }
+        */
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
-                <input type="checkbox" id="cb:prerequisite" name="prerequisite" value="isPrerequisite" />
+                <input type="checkbox" id="cb:prerequisite" name="prerequisite" defaultChecked={this.isPrerequisite}
+                    onChange={event => {
+                        this.commands.execute('set-as-prerequisite', { state: this.id });
+                    }}
+                />
                 <label htmlFor="cb:prerequisite">Is prerequisite</label><span />
                 <input type="checkbox" id="cb:linked" name="linked" value="isLinked" />
-                <label htmlFor="cb:linked">To be executed together with the previous cell</label><br />
+                <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     onClick={event => {
@@ -109,11 +173,12 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 export class ContentFactoryWithFooterButton extends NotebookPanel.ContentFactory {
     constructor(
         commands: CommandRegistry,
-        options?: Cell.ContentFactory.IOptions | undefined
+        options?: Cell.ContentFactory.IOptions | undefined,
     ) {
         super(options);
         this.commands = commands;
     }
+
     /**
      * Create a new cell header for the parent widget.
      */
