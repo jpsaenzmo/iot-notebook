@@ -77,7 +77,7 @@ export function activateCommands(
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set('is_prerequisite', args.state);
-                    content.activeCell
+
                     content.update();
                 }
             },
@@ -91,15 +91,22 @@ export function activateCommands(
                 const current = getCurrent(args);
 
                 if (current) {
-                    //const { content } = current;
+                    const { content } = current;
+
                     if (current.model == null) {
                         console.log('Model es null');
+
                     }
                     if (current.model != null) {
+
+                        const hola = content.widgets.find(widget => widget.model === content.activeCell.model);
+
+                        console.log('nodo de hola.node: ', hola.node);
+
+
                         current.model.metadata.get('is_prerequisite');
                         console.log('Hola perro: ', current.model.metadata.get('is_prerequisite'));
                     }
-
                     //current.update();
                     //console.log('Current nodehjkkjhkj: ', content.);
                 }
