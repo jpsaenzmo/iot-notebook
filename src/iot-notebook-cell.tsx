@@ -55,6 +55,24 @@ export function activateCommands(
             );
         }
 
+        function turnOnTags(tracker: INotebookTracker,toggle: boolean){
+            var cells = tracker.currentWidget.model.cells;
+            for (var i=0;i<cells.length;i++){
+                let tags=cells[i].metadata.get("tags") as string[]
+                if (tags != null){
+                    for (var j=0;j<tags.length;j++){
+                        if (tags[j].startsWith("dom-") == true){
+                            let newtag = tags[j].substring(4,tags[j].length)
+                            // find the cell with this ID
+                            let cell = tracker.currentWidget.content.widgets.find(widget => widget.model.id === cells[i].id);
+                            toggle ? cell.addClass(newtag) : cell.removeClass(newtag)
+                        }
+                    }
+                }
+            }   
+        }
+        
+
         commands.addCommand('run-selected-codecell', {
             label: 'Run Cell',
             execute: args => {
@@ -73,7 +91,7 @@ export function activateCommands(
             execute: args => {
                 //console.log('Entra al command ', args.state);
                 const current = getCurrent(args);
-
+                
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set('is_prerequisite', args.state);
@@ -87,7 +105,11 @@ export function activateCommands(
         commands.addCommand('recibir-senal', {
             label: 'Is prerequisite',
             execute: args => {
+               
                 console.log('Entra al recibir senal ');
+
+                turnOnTags
+                /*
                 const current = getCurrent(args);
 
                 if (current) {
@@ -110,6 +132,7 @@ export function activateCommands(
                     //current.update();
                     //console.log('Current nodehjkkjhkj: ', content.);
                 }
+                */
             },
             isEnabled
         });
@@ -187,7 +210,7 @@ export class ContentFactoryWithFooterButton extends NotebookPanel.ContentFactory
     }
 
     /**
-     * Create a new cell header for the parent widget.
+     * Create a new cell footer for the parent widget.
      */
     createCellFooter(): ICellFooter {
         return new CellFooterWithButton(this.commands);
