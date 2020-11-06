@@ -7,9 +7,7 @@ import {
 import {
     INotebookTracker,
     NotebookPanel,
-    NotebookActions,
-    //NotebookTracker,
-    //Notebook
+    NotebookActions
 } from '@jupyterlab/notebook';
 
 import { ICellFooter, Cell } from '@jupyterlab/cells';
@@ -19,8 +17,6 @@ import { CommandRegistry } from '@lumino/commands';
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
 import { ReactWidget } from '@jupyterlab/apputils';
-
-// import { Notebook } from '@jupyterlab/notebook';
 
 /**
  * The CSS classes added to the cell footer.
@@ -54,7 +50,7 @@ export function activateCommands(
                 tracker.currentWidget === app.shell.currentWidget
             );
         }
-
+        /*
         function turnOnTags(tracker: INotebookTracker,toggle: boolean){
             var cells = tracker.currentWidget.model.cells;
             for (var i=0;i<cells.length;i++){
@@ -71,7 +67,7 @@ export function activateCommands(
                 }
             }   
         }
-        
+        */
 
         commands.addCommand('run-selected-codecell', {
             label: 'Run Cell',
@@ -89,9 +85,8 @@ export function activateCommands(
         commands.addCommand('set-as-prerequisite', {
             label: 'Is prerequisite',
             execute: args => {
-                //console.log('Entra al command ', args.state);
                 const current = getCurrent(args);
-                
+
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set('is_prerequisite', args.state);
@@ -105,11 +100,10 @@ export function activateCommands(
         commands.addCommand('recibir-senal', {
             label: 'Is prerequisite',
             execute: args => {
-               
                 console.log('Entra al recibir senal ');
-
-                turnOnTags
                 /*
+                turnOnTags
+                
                 const current = getCurrent(args);
 
                 if (current) {
@@ -125,7 +119,6 @@ export function activateCommands(
 
                         console.log('nodo de hola.node: ', hola.node);
 
-
                         current.model.metadata.get('is_prerequisite');
                         console.log('Hola perro: ', current.model.metadata.get('is_prerequisite'));
                     }
@@ -137,7 +130,6 @@ export function activateCommands(
             isEnabled
         });
     });
-
     return Promise.resolve();
 }
 
@@ -147,8 +139,6 @@ export function activateCommands(
 class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     private isPrerequisite: boolean;
-
-    // private _notebook: Notebook;
 
     /**
      * Construct a new cell footer.
@@ -160,25 +150,26 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isPrerequisite = false;
     }
 
+    changeIsPrerequisite() {
+        this.isPrerequisite = !this.isPrerequisite;
+    }
+
     private readonly commands: CommandRegistry;
 
     render() {
-        console.log('Entra al render');
-
+        /*
         if (this.commands.isEnabled('recibir-senal')) {
             console.log('recibir senal is enabled');
             this.commands.execute('recibir-senal', { state: this.isPrerequisite });
-        }
-        /*
-        if (this._notebook.activeCell.model.metadata.get('is_prerequisite') == true) {
-            this.isPrerequisite = true
         }
         */
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
                 <input type="checkbox" id="cb:prerequisite" name="prerequisite" defaultChecked={this.isPrerequisite}
                     onChange={event => {
-                        this.commands.execute('set-as-prerequisite', { state: this.id });
+                        this.changeIsPrerequisite();
+                        this.commands.execute('set-as-prerequisite', { state: this.isPrerequisite });
+                        this.update
                     }}
                 />
                 <label htmlFor="cb:prerequisite">Is prerequisite</label><span />

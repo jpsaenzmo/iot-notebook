@@ -6,9 +6,7 @@ import {
 
 import {
   NotebookPanel,
-  INotebookTracker,
-  //INotebookTools,
-  //INotebookTools,
+  INotebookTracker
 } from '@jupyterlab/notebook';
 
 import { ICommandPalette } from '@jupyterlab/apputils';
@@ -16,8 +14,6 @@ import { ICommandPalette } from '@jupyterlab/apputils';
 import { ILauncher } from '@jupyterlab/launcher';
 
 import { IMainMenu } from '@jupyterlab/mainmenu';
-
-//import { IEditorServices } from '@jupyterlab/codeeditor';
 
 import { IoTSideBar } from './iot-notebook-sidebar';
 
@@ -62,17 +58,13 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
  */
 const iotcell: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   id: 'iot-notebook:cell',
-  // requires: [IEditorServices, INotebookTools],
   provides: NotebookPanel.IContentFactory,
   autoStart: true,
-  //, editorServices: IEditorServices
   activate: (app: JupyterFrontEnd) => {
 
     console.log('JupyterLab extension iot-notebook:cell is activated!');
 
     const { commands } = app;
-    // const editorFactory = editorServices.factoryService.newInlineEditor;
-    // { editorFactory }
     return new ContentFactoryWithFooterButton(commands);
   }
 };
