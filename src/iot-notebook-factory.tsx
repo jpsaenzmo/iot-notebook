@@ -103,7 +103,6 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     }
 
     changeIsPrerequisite(prerequisite: boolean) {
-        console.log('Entra a change is prerequisite');
         this.isPrerequisite = prerequisite;
         this.update();
     }
