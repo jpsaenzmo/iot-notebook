@@ -2,6 +2,7 @@ import {
   ILabShell,
   JupyterFrontEnd,
   JupyterFrontEndPlugin,
+  ILayoutRestorer,
 } from '@jupyterlab/application';
 
 import {
@@ -22,6 +23,8 @@ import { IoTNotebookContentFactory, activateCommands } from './iot-notebook-fact
 import { IoTToolbar } from './iot-notebook-toolbar'
 
 import { LabIcon } from '@jupyterlab/ui-components';
+
+import { ITranslator } from '@jupyterlab/translation';
 
 export const iotIcon = new LabIcon({
   name: 'defaultpkg:iot',
@@ -91,6 +94,18 @@ const iottoolbar: JupyterFrontEndPlugin<void> = {
   }
 }
 
+const iottest: JupyterFrontEndPlugin<void> = {
+  id: 'iot-notebook:test',
+  requires: [ITranslator],
+  optional: [ILayoutRestorer, ILabShell],
+  autoStart: true,
+  activate: (app: JupyterFrontEnd, translator: ITranslator,
+    restorer: ILayoutRestorer | null, labShell: ILabShell | null
+  ) => {
+    console.log('JupyterLab extension iot-notebook:test is activated!');
+  }
+}
+
 /**
  * Export the plugins as default.
  */
@@ -98,7 +113,8 @@ const plugins: Array<JupyterFrontEndPlugin<any>> = [
   iotsidebar,
   iotfactory,
   iottoolbar,
-  iotcellfooter
+  iotcellfooter,
+  iottest
 ];
 
 export default plugins;
