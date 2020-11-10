@@ -1,3 +1,14 @@
+/*-----------------------------------------------------------------------------
+| Variables
+|----------------------------------------------------------------------------*/
+
+:root {
+  --jp-private-iotsidebar-button-height: 28px;
+  --jp-private-iotsidebar-button-width: 48px;
+  --jp-private-iotsidebar-item-height: 24px;
+  --jp-private-iotsidebar-shutdown-button-height: 24px;
+}
+
 /*
   Main widget layout and styling
 */
@@ -49,4 +60,45 @@
   margin: 0;
   padding: 0;
   overflow: auto;
+}
+
+.jp-iotsidebar-sectionList {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+.jp-iotsidebar-item {
+  display: flex;
+  flex-direction: row;
+  color: var(--jp-ui-font-color1);
+  height: var(--jp-private-iotsidebar-item-height);
+  line-height: var(--jp-private-iotsidebar-item-height);
+  padding: 0 8px 0 8px;
+}
+
+.jp-iotsidebar-item:hover {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-iotsidebar-itemLabel {
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 55%;
+  padding: 0 4px 0 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.jp-iotsidebar-itemLabel:focus {
+  background-color: var(--jp-layout-color2);
+}
+
+.jp-iotsidebar-itemDetail {
+  font-size: var(--jp-ui-font-size1);
+  flex: 1 1 45%;
+  padding: 0 4px 0 4px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
 }
