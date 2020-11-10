@@ -28,6 +28,9 @@ const CELL_FOOTER_CLASS = 'jp-CellFooter';
 const CELL_FOOTER_DIV_CLASS = 'iotcell-cellFooterContainer';
 const CELL_FOOTER_BUTTON_CLASS = 'iotcell-cellFooterBtn';
 
+const IS_PREREQUISITE = 'is_prerequisite'
+const IS_LINKED = 'is_linked_previous_cell'
+
 export function activateCommands(
     app: JupyterFrontEnd,
     tracker: INotebookTracker
@@ -74,7 +77,22 @@ export function activateCommands(
 
                 if (current) {
                     const { content } = current;
-                    content.activeCell.model.metadata.set('is_prerequisite', args.state);
+                    content.activeCell.model.metadata.set(IS_PREREQUISITE, args.state);
+
+                    content.update();
+                }
+            },
+            isEnabled
+        });
+
+        commands.addCommand('set-as-linked', {
+            label: 'Is linked to previous cell',
+            execute: args => {
+                const current = getCurrent(args);
+
+                if (current) {
+                    const { content } = current;
+                    content.activeCell.model.metadata.set(IS_LINKED, args.state);
 
                     content.update();
                 }
@@ -90,7 +108,17 @@ export function activateCommands(
  */
 class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
+    /**
+    * Whether or not the cell is a prerequisite.
+    */
     private isPrerequisite: boolean;
+
+    /**
+    * Whether or not the cell is linked with the previous cell in the notebook document.
+    */
+    private isLinked: boolean;
+
+    private readonly commands: CommandRegistry;
 
     /**
      * Construct a new cell footer.
@@ -100,6 +128,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.addClass(CELL_FOOTER_CLASS);
         this.commands = commands;
         this.isPrerequisite = false;
+        this.isLinked = false;
     }
 
     changeIsPrerequisite(prerequisite: boolean) {
@@ -107,7 +136,10 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.update();
     }
 
-    private readonly commands: CommandRegistry;
+    changeIsLinked(linked: boolean) {
+        this.isLinked = linked;
+        this.update();
+    }
 
     render() {
         return (
@@ -119,7 +151,11 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     }}
                 />
                 <label htmlFor="cb:prerequisite">Is prerequisite</label><span />
-                <input type="checkbox" id="cb:linked" name="linked" value="isLinked" />
+                <input type="checkbox" id="cb:linked" name="linked" checked={this.isLinked}
+                    onChange={event => {
+                        this.changeIsLinked(!this.isLinked);
+                        this.commands.execute('set-as-linked', { state: this.isLinked });
+                    }} />
                 <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
@@ -138,6 +174,9 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
  * Extend the default implementation of an `IContentFactory`.
  */
 export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
+
+    private readonly commands: CommandRegistry;
+
     constructor(
         commands: CommandRegistry,
         options?: Cell.ContentFactory.IOptions | undefined
@@ -147,7 +186,7 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
     }
 
     /**
-     * Create a new notebook for the parent widget.
+     * Create a new custom IoT Notebook for the parent widget.
      */
     createNotebook(options: Notebook.IOptions): Notebook {
         return new IoTNotebook(options);
@@ -159,8 +198,6 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
     createCellFooter(): ICellFooter {
         return new CellFooterWithButton(this.commands);
     }
-
-    private readonly commands: CommandRegistry;
 }
 
 /**
@@ -176,11 +213,13 @@ class IoTNotebook extends Notebook {
     onActivateRequest() {
         each(this.widgets, widget => {
             const widgetModel = widget.model;
-            if (widgetModel.type === 'code' && widgetModel.metadata.get('is_prerequisite') != null) {
-                const isPrerequisite = widgetModel.metadata.get('is_prerequisite') == true ? true : false;
+            if (widgetModel.type === 'code' && (widgetModel.metadata.get(IS_PREREQUISITE) != null || widgetModel.metadata.get(IS_LINKED) != null)) {
+                const isPrerequisite = widgetModel.metadata.get(IS_PREREQUISITE) != null && widgetModel.metadata.get(IS_PREREQUISITE) == true ? true : false;
+                const isLinked = widgetModel.metadata.get(IS_LINKED) != null && widgetModel.metadata.get(IS_LINKED) == true ? true : false;
                 const childrens = toArray(widget.children());
                 const footer = childrens[3] as CellFooterWithButton;
                 footer.changeIsPrerequisite(isPrerequisite);
+                footer.changeIsLinked(isLinked);
             }
         });
     }
