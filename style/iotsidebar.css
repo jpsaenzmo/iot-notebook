@@ -24,6 +24,13 @@
   font-size: var(--jp-ui-font-size1);
 }
 
+.jp-iotsidebar-header {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+}
+
 .jp-iotsidebar-section {
   display: flex;
   flex: 0 1 auto;
