@@ -108,8 +108,6 @@ export class RunningSessionManagers implements IRunningSessionManagers {
     private _managers: IRunningSessions.IManager[] = [];
 }
 
-
-
 /**
  * A notebook widget extension that adds a button to the sidebar.
  */
@@ -140,18 +138,6 @@ export class IoTSideBar extends ReactWidget {
                 translator={this.translator}
             />
         );
-
-        /*
-        return (
-            <>
-                <Section title='Application and cloud services'></Section>
-                <Section title='Devices'></Section>
-                <Section title='Gateway'></Section>
-                <Section title='Undefined'></Section>
-            </>
-        );
-        */
-
     }
 
     private managers: IRunningSessionManagers;
@@ -195,11 +181,8 @@ function Section(props: { manager: IRunningSessions.IManager; translator?: ITran
                 <header className={SECTION_HEADER_CLASS}>
                     <h2>{trans.__(props.manager.name)}</h2>
                 </header>
-
                 <div className={CONTAINER_CLASS}>
                     <List manager={props.manager}></List>
-                    {//<ListView documents={['Juan', 'Pablo', 'Sáenz']}></ListView>
-                    }
                 </div>
             </>
         </div>
