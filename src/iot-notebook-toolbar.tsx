@@ -27,6 +27,7 @@ import {
     TranslationBundle
 } from '@jupyterlab/translation';
 
+
 import { Notebook } from '@jupyterlab/notebook';
 
 /**
@@ -69,7 +70,9 @@ export class  IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPa
 
 export class IoTArchitecturalSwitch extends ReactWidget {
 
-    constructor(widget: Notebook, translator?: ITranslator) {
+    constructor(widget: Notebook, 
+        translator?: ITranslator
+        ) {
         super();
         this._trans = (translator || nullTranslator).load('jupyterlab');
         this.addClass(IOTTOOLBAR_ARCHITECTURAL_CLASS);

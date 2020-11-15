@@ -112,7 +112,9 @@ export class RunningSessionManagers implements IRunningSessionManagers {
  * A notebook widget extension that adds a button to the sidebar.
  */
 export class IoTSideBar extends ReactWidget {
-    constructor(managers: IRunningSessionManagers, translator?: ITranslator) {
+    constructor(managers: IRunningSessionManagers, 
+        translator?: ITranslator
+        ) {
         super();
         console.log('entra');
         this.id = 'iotsidebar';
@@ -172,14 +174,16 @@ function RunningSessionsComponent(props: {
     );
 }
 
-function Section(props: { manager: IRunningSessions.IManager; translator?: ITranslator; }) {
-    const translator = props.translator || nullTranslator;
-    const trans = translator.load('jupyterlab');
+function Section(props: { manager: IRunningSessions.IManager; 
+    translator?: ITranslator; 
+}) {
+    //const translator = props.translator || nullTranslator;
+    //const trans = translator.load('jupyterlab');
     return (
         <div className={SECTION_CLASS}>
             <>
                 <header className={SECTION_HEADER_CLASS}>
-                    <h2>{trans.__(props.manager.name)}</h2>
+                    <h2>{props.manager.name}</h2>
                 </header>
                 <div className={CONTAINER_CLASS}>
                     <List manager={props.manager}></List>
@@ -233,8 +237,8 @@ function Item(props: {
     // const runningItem = props.runningItem;
     // const icon = LabIcon;
     // const detail = runningItem.detail?.();
-    // const translator = props.translator || nullTranslator;
-    // const trans = translator.load('jupyterlab');
+    //const translator = props.translator || nullTranslator;
+    //const trans = translator.load('jupyterlab');
     // const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
     // const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
 

@@ -5,18 +5,24 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
+//import { ITranslator } from '@jupyterlab/translation';
+
+import {
+  //nullTranslator,
+  ITranslator,
+  // TranslationBundle
+} from '@jupyterlab/translation';
+
 import {
   NotebookPanel,
   INotebookTracker
 } from '@jupyterlab/notebook';
 
 import {
-  IRunningSessionManagers,
   RunningSessionManagers,
   IoTSideBar,
 } from './iot-notebook-sidebar'
 
-import { ITranslator } from '@jupyterlab/translation';
 
 import { IoTNotebookContentFactory, activateCommands } from './iot-notebook-factory'
 
@@ -44,30 +50,37 @@ import iotIconAESvgStr from '../style/icons/iot-ae.svg';
 /**
  * Initialization data for the iot-notebook:sidebar extension.
  */
-const iotsidebar: JupyterFrontEndPlugin<IRunningSessionManagers> = {
+const iotsidebar: JupyterFrontEndPlugin<RunningSessionManagers> = {
   //activate,
   id: 'iot-notebook:sidebar',
   autoStart: true,
-  provides: IRunningSessionManagers,
-  requires: [IDocumentManager, ITranslator],
-  optional: [ILayoutRestorer, ILabShell],
+  //provides: IRunningSessionManagers,
+  requires: [IDocumentManager],
+  optional: [ILayoutRestorer, ILabShell, IDocumentManager, ITranslator],
   activate: (app: JupyterFrontEnd,
     translator: ITranslator,
     restorer: ILayoutRestorer | null,
     labShell: ILabShell | null,
     docManager: IDocumentManager) => {
-    console.log('JupyterLab extension iot-notebook:sidebar is activated!');
-    const trans = translator.load('jupyterlab');
-
+    console.log('JupyterLab extension iot-notebook:sidebar is activatedaña!');
+    
+    //const trans = translator.load('jupyterlab');
+    //const trans = translator.load;
+    /*
+    if(trans != null){
+      console.log("trans no es null");
+    }
+    */
+    
     const runningSessionManagers = new RunningSessionManagers();
     const running = new IoTSideBar(runningSessionManagers, translator);
-    running.title.caption = trans.__('Running Terminals and Kernels');
+    //running.title.caption = trans.__('Running Terminals and Kernels');
     running.id = 'jp-running-sessions';
     running.title.caption = 'Running Terminals and Kernels';
     //running.title.icon = runningIcon;
     
     
-    /*
+    
     docManager.activateRequested.connect(async (_, path) => {
       const item = await docManager.services.contents.get(path, {
         content: false,
@@ -81,11 +94,12 @@ const iotsidebar: JupyterFrontEndPlugin<IRunningSessionManagers> = {
         console.log(parent);
       }
     });
-    */
+    
 
     // Let the application restorer track the running panel for restoration of
     // application state (e.g. setting the running panel as the current side bar
     // widget).
+    
     if (restorer) {
       restorer.add(running, 'running-sessions');
     }
@@ -98,6 +112,7 @@ const iotsidebar: JupyterFrontEndPlugin<IRunningSessionManagers> = {
     app.shell.add(running, 'left', { rank: 200 });
 
     return runningSessionManagers;
+    
   }
 };
 

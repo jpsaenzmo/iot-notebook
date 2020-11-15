@@ -11,7 +11,7 @@ import { ILabShell } from '@jupyterlab/application';
 
 import { IRunningSessions, IRunningSessionManagers } from './iot-notebook-sidebar';
 
-//import { ITranslator } from '@jupyterlab/translation';
+// import { ITranslator } from '@jupyterlab/translation';
 
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
 

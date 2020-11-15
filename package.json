@@ -25,23 +25,26 @@
     "url": "https://git.elite.polito.it/iot-notebook/iot-notebook.git.git"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rimraf lib tsconfig.tsbuildinfo",
+    "build": "tsc -b",
+    "clean": "rimraf lib && rimraf tsconfig.tsbuildinfo",
+    "install-ext": "jupyter labextension install . --no-build",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
     "prepare": "jlpm run clean && jlpm run build",
-    "watch": "tsc -w"
+    "watch": "tsc -b -w"
   },
   "dependencies": {
     "@jupyterlab/application": "^2.2.6",
+    "@jupyterlab/apputils": "^2.2.6",
     "@jupyterlab/coreutils": "^4.2.5",
-    "@jupyterlab/docmanager": "^2.0.0",
     "@jupyterlab/launcher": "^2.2.5",
     "@jupyterlab/mainmenu": "^2.2.3",
     "@jupyterlab/notebook": "^2.2.6",
-    "@jupyterlab/translation": "^3.0.0-beta.8",
     "@jupyterlab/ui-components": "^2.2.4",
-    "@lumino/signaling": "^1.4.3"
+    "@lumino/coreutils": "1.5.3",
+    "@lumino/signaling": "^1.4.3",
+    "react": "16.9.0",
+    "crypto": "1.0.1"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.25.0",
