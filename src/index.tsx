@@ -55,8 +55,8 @@ const iotsidebar: JupyterFrontEndPlugin<RunningSessionManagers> = {
   id: 'iot-notebook:sidebar',
   autoStart: true,
   //provides: IRunningSessionManagers,
-  requires: [IDocumentManager],
-  optional: [ILayoutRestorer, ILabShell, IDocumentManager, ITranslator],
+  requires: [IDocumentManager, ITranslator],
+  optional: [ILayoutRestorer, ILabShell],
   activate: (app: JupyterFrontEnd,
     translator: ITranslator,
     restorer: ILayoutRestorer | null,
@@ -64,13 +64,12 @@ const iotsidebar: JupyterFrontEndPlugin<RunningSessionManagers> = {
     docManager: IDocumentManager) => {
     console.log('JupyterLab extension iot-notebook:sidebar is activatedaña!');
     
-    //const trans = translator.load('jupyterlab');
+    const trans = translator.load('jupyterlab');
     //const trans = translator.load;
-    /*
+    
     if(trans != null){
       console.log("trans no es null");
     }
-    */
     
     const runningSessionManagers = new RunningSessionManagers();
     const running = new IoTSideBar(runningSessionManagers, translator);
