@@ -38,7 +38,7 @@ export const iotaeIcon = new LabIcon({
   svgstr: iotIconAESvgStr
 });
 
-import iotIconSvgStr from '../style/icons/iot.svg';
+import iotIconSvgStr from '../style/icons/iot-plain.svg';
 import iotIconAESvgStr from '../style/icons/iot-ae.svg';
 
 /**
