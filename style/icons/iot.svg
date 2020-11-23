@@ -9,13 +9,13 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="24"
-   height="24"
-   viewBox="0 0 6.3499999 6.3500002"
-   version="1.1"
-   id="svg8"
+   sodipodi:docname="iot.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="iot.svg">
+   id="svg8"
+   version="1.1"
+   viewBox="0 0 6.3499999 6.3500002"
+   height="24"
+   width="24">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -26,7 +26,7 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="31.678384"
-     inkscape:cx="5.5037312"
+     inkscape:cx="-0.14680956"
      inkscape:cy="9.448749"
      inkscape:document-units="mm"
      inkscape:current-layer="text817"
@@ -59,17 +59,23 @@
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:10.58333302px;line-height:1.25;font-family:roboto;-inkscape-font-specification:roboto;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.26458332"
        id="text817"
        transform="translate(-0.4015997,1.937128)">
-      <text
-         xml:space="preserve"
-         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;line-height:1.25;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#616161;fill-opacity:1;stroke:none;stroke-width:0.03032123;"
-         x="-342.3533"
-         y="122.91879"
-         id="text821"><tspan
-           sodipodi:role="line"
-           id="tspan819"
-           x="-342.3533"
-           y="122.91879"
-           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.03032123;fill:#616161;fill-opacity:1;">IOT</tspan></text>
+      <g
+         aria-label="IOT"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;line-height:1.25;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#616161;fill-opacity:1;stroke:none;stroke-width:0.03032123"
+         id="text821">
+        <path
+           d="m -342.08695,119.97993 h 0.6312 v 2.93886 h -0.6312 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#616161;fill-opacity:1;stroke-width:0.03032123"
+           id="path823" />
+        <path
+           d="m -340.96109,121.44824 q 0,-0.65134 0.42975,-1.07437 0.43199,-0.42527 1.02289,-0.42527 0.65358,0 1.08109,0.42751 0.42751,0.42527 0.42751,1.07661 0,0.64686 -0.42303,1.07437 -0.42304,0.42752 -1.06542,0.42752 -0.64239,0 -1.05871,-0.42528 -0.41408,-0.42527 -0.41408,-1.08109 z m 1.48174,-0.91322 q -0.36932,-0.007 -0.59538,0.25517 -0.22607,0.26188 -0.22607,0.67596 0,0.3917 0.23054,0.6491 0.23055,0.2574 0.58196,0.2574 0.36931,0 0.59538,-0.25292 0.2283,-0.25517 0.2283,-0.67149 0,-0.4096 -0.22382,-0.65805 -0.22159,-0.24845 -0.59091,-0.25517 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#616161;fill-opacity:1;stroke-width:0.03032123"
+           id="path825" />
+        <path
+           d="m -337.71335,119.97993 h 1.9764 v 0.62448 h -0.67372 v 2.31438 h -0.63343 v -2.31438 h -0.66925 z"
+           style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:4.58399725px;font-family:'Tw Cen MT';-inkscape-font-specification:'Tw Cen MT, Bold';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#616161;fill-opacity:1;stroke-width:0.03032123"
+           id="path827" />
+      </g>
     </g>
   </g>
 </svg>

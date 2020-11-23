@@ -5,34 +5,28 @@ import {
   JupyterFrontEndPlugin,
 } from '@jupyterlab/application';
 
-//import { ITranslator } from '@jupyterlab/translation';
-
-import {
-  //nullTranslator,
-  ITranslator,
-  // TranslationBundle
-} from '@jupyterlab/translation';
-
 import {
   NotebookPanel,
   INotebookTracker
 } from '@jupyterlab/notebook';
 
+import { IFileBrowserFactory, FilterFileBrowserModel, FileBrowser } from '@jupyterlab/filebrowser'
+
+/*
 import {
+  IRunningSessionManagers,
   RunningSessionManagers,
   IoTSideBar,
 } from './iot-notebook-sidebar'
+*/
 
+import { LabIcon } from '@jupyterlab/ui-components';
 
 import { IoTNotebookContentFactory, activateCommands } from './iot-notebook-factory'
 
 import { IoTToolbar } from './iot-notebook-toolbar'
 
-import { LabIcon } from '@jupyterlab/ui-components';
-
-import { addOpenTabsSessionManager } from './opentabs';
-
-import { IDocumentManager } from '@jupyterlab/docmanager';
+// import { addOpenTabsSessionManager } from './opentabs';
 
 export const iotIcon = new LabIcon({
   name: 'defaultpkg:iot',
@@ -48,71 +42,14 @@ import iotIconSvgStr from '../style/icons/iot.svg';
 import iotIconAESvgStr from '../style/icons/iot-ae.svg';
 
 /**
- * Initialization data for the iot-notebook:sidebar extension.
+ * Initialization data for the iot-notebook:factory extension.
  */
-const iotsidebar: JupyterFrontEndPlugin<RunningSessionManagers> = {
-  //activate,
-  id: 'iot-notebook:sidebar',
-  autoStart: true,
-  //provides: IRunningSessionManagers,
-  requires: [IDocumentManager, ITranslator],
+const iotsidebar: JupyterFrontEndPlugin<void> = {
+  id: 'iot-notebook:iotsidebar',
+  // provides: IRunningSessionManagers,
   optional: [ILayoutRestorer, ILabShell],
-  activate: (app: JupyterFrontEnd,
-    translator: ITranslator,
-    restorer: ILayoutRestorer | null,
-    labShell: ILabShell | null,
-    docManager: IDocumentManager) => {
-    console.log('JupyterLab extension iot-notebook:sidebar is activatedaña!');
-    
-    const trans = translator.load('jupyterlab');
-    //const trans = translator.load;
-    
-    if(trans != null){
-      console.log("trans no es null");
-    }
-    
-    const runningSessionManagers = new RunningSessionManagers();
-    const running = new IoTSideBar(runningSessionManagers, translator);
-    //running.title.caption = trans.__('Running Terminals and Kernels');
-    running.id = 'jp-running-sessions';
-    running.title.caption = 'Running Terminals and Kernels';
-    //running.title.icon = runningIcon;
-    
-    
-    
-    docManager.activateRequested.connect(async (_, path) => {
-      const item = await docManager.services.contents.get(path, {
-        content: false,
-      });
-      const fileType = app.docRegistry.getFileTypeForModel(item);
-      const contentType = fileType.contentType;
-      // Add the containing directory, too
-      if (contentType !== 'directory') {
-        const parent =
-          path.lastIndexOf('/') > 0 ? path.slice(0, path.lastIndexOf('/')) : '';
-        console.log(parent);
-      }
-    });
-    
-
-    // Let the application restorer track the running panel for restoration of
-    // application state (e.g. setting the running panel as the current side bar
-    // widget).
-    
-    if (restorer) {
-      restorer.add(running, 'running-sessions');
-    }
-    if (labShell) {
-      addOpenTabsSessionManager(runningSessionManagers, labShell);
-    }
-    //addKernelRunningSessionManager(runningSessionManagers, translator, app);
-    // Rank has been chosen somewhat arbitrarily to give priority to the running
-    // sessions widget in the sidebar.
-    app.shell.add(running, 'left', { rank: 200 });
-
-    return runningSessionManagers;
-    
-  }
+  autoStart: true,
+  activate
 };
 
 /**
@@ -153,6 +90,71 @@ const iottoolbar: JupyterFrontEndPlugin<void> = {
   }
 }
 
+function activate() {
+
+  const createFileBrowser = (
+    id: string,
+    options: IFileBrowserFactory.IOptions = {}
+  ) => {
+    const model = new FilterFileBrowserModel({
+      //translator: translator,
+      auto: options.auto ?? true,
+      manager: docManager,
+      driveName: options.driveName || '',
+      refreshInterval: options.refreshInterval,
+      state:
+        options.state === null ? undefined : options.state || state || undefined
+    });
+    const restore = options.restore;
+    const widget = new FileBrowser({ id, model, restore });
+
+    // Track the newly created file browser.
+    void tracker.add(widget);
+
+    return widget;
+  };
+
+  // Manually restore and load the default file browser.
+  const defaultBrowser = createFileBrowser('filebrowser', {
+    auto: false,
+    restore: false
+  });
+
+  return defaultBrowser;
+}
+
+/**
+ * Activate the running plugin.
+ 
+function activate(
+  app: JupyterFrontEnd,
+  restorer: ILayoutRestorer | null,
+  labShell: ILabShell | null
+): IRunningSessionManagers {
+ 
+  console.log('JupyterLab extension iot-notebook:iotsidebar is activated!');
+ 
+  const runningSessionManagers = new RunningSessionManagers();
+  const running = new IoTSideBar(runningSessionManagers);
+  running.id = 'jp-running-sessions';
+  running.title.caption = 'Running Terminals and Kernels';
+ 
+  // Let the application restorer track the running panel for restoration of
+  // application state (e.g. setting the running panel as the current side bar
+  // widget).
+  if (restorer) {
+    restorer.add(running, 'running-sessions');
+  }
+  if (labShell) {
+    addOpenTabsSessionManager(runningSessionManagers, labShell);
+  }
+ 
+  app.shell.add(running, 'left', { rank: 150 });
+ 
+  return runningSessionManagers;
+}
+ */
+
 /**
  * Export the plugins as default.
  */
@@ -164,3 +166,4 @@ const plugins: Array<JupyterFrontEndPlugin<any>> = [
 ];
 
 export default plugins;
+

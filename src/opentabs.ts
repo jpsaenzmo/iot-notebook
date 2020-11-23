@@ -11,8 +11,6 @@ import { ILabShell } from '@jupyterlab/application';
 
 import { IRunningSessions, IRunningSessionManagers } from './iot-notebook-sidebar';
 
-// import { ITranslator } from '@jupyterlab/translation';
-
 import { fileIcon, LabIcon } from '@jupyterlab/ui-components';
 
 import { DocumentWidget } from '@jupyterlab/docregistry';
@@ -90,11 +88,6 @@ export function addOpenTabsSessionManager(
             return void 0;
         },
         runningChanged: signaler.tabsChanged,
-        //shutdownLabel: trans.__('Close'),
-        //shutdownAllLabel: trans.__('Close All'),
-        //shutdownAllConfirmationText: trans.__(
-        //    'Are you sure you want to close all open tabs?'
-        //)
     });
 
     class OpenTab implements IRunningSessions.IRunningItem {
@@ -105,7 +98,7 @@ export function addOpenTabsSessionManager(
             labShell.activateById(this._widget.id);
         }
         shutdown() {
-            this._widget.close();
+            
         }
         icon() {
             const widgetIcon = this._widget.title.icon;

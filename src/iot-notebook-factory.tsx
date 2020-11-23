@@ -205,7 +205,6 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
  */
 class IoTNotebook extends Notebook {
 
-
     constructor(options?: Notebook.IOptions) {
         super(options);
     }
