@@ -4,11 +4,13 @@ import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
 
 import * as React from 'react';
 
-import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+//import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { ISignal } from '@lumino/signaling';
 
 import { LabIcon } from '@jupyterlab/ui-components';
+
+import { DirListing } from '@jupyterlab/filebrowser'
 
 import { DisposableDelegate, IDisposable } from '@lumino/disposable';
 
@@ -113,7 +115,7 @@ export class RunningSessionManagers implements IRunningSessionManagers {
  */
 export class IoTSideBar extends ReactWidget {
     constructor(managers: IRunningSessionManagers, 
-        translator?: ITranslator
+        //translator?: ITranslator
         ) {
         super();
         console.log('entra');
@@ -127,7 +129,7 @@ export class IoTSideBar extends ReactWidget {
             console.log('managers is null');
         }
 
-        this.translator = translator || nullTranslator;
+        //this.translator = translator || nullTranslator;
 
         this.addClass(WIDGET_CLASS);
     }
@@ -137,18 +139,18 @@ export class IoTSideBar extends ReactWidget {
         return (
             <RunningSessionsComponent
                 managers={this.managers}
-                translator={this.translator}
+                //translator={this.translator}
             />
         );
     }
 
     private managers: IRunningSessionManagers;
-    protected translator: ITranslator;
+    //protected translator: ITranslator;
 }
 
 function RunningSessionsComponent(props: {
     managers: IRunningSessionManagers;
-    translator?: ITranslator;
+    //translator?: ITranslator;
 }) {
     //const translator = props.translator || nullTranslator;
     //const trans = translator.load('jupyterlab');
@@ -167,7 +169,7 @@ function RunningSessionsComponent(props: {
                 <Section
                     key={manager.name}
                     manager={manager}
-                    translator={props.translator}
+                    //translator={props.translator}
                 />
             ))}
         </>
@@ -175,7 +177,7 @@ function RunningSessionsComponent(props: {
 }
 
 function Section(props: { manager: IRunningSessions.IManager; 
-    translator?: ITranslator; 
+    //translator?: ITranslator; 
 }) {
     //const translator = props.translator || nullTranslator;
     //const trans = translator.load('jupyterlab');
@@ -197,13 +199,13 @@ function List(props: {
     manager: IRunningSessions.IManager;
     shutdownLabel?: string;
     shutdownAllLabel?: string;
-    translator?: ITranslator;
+    //translator?: ITranslator;
 }) {
     return (
         <UseSignal signal={props.manager.runningChanged}>
             {() => (
                 <ListView runningItems={props.manager.running()}
-                    translator={props.translator}
+                    //translator={props.translator}
                 />
             )}
         </UseSignal>
@@ -212,7 +214,7 @@ function List(props: {
 
 function ListView(props: {
     runningItems: IRunningSessions.IRunningItem[];
-    translator?: ITranslator;
+    //translator?: ITranslator;
 }) {
     return (
         <ul className={LIST_CLASS}>
@@ -220,7 +222,7 @@ function ListView(props: {
                 <Item
                     key={i}
                     runningItem={item}
-                    translator={props.translator}
+                    //translator={props.translator}
                 />
             ))}
         </ul>
@@ -231,7 +233,7 @@ function Item(props: {
     runningItem: IRunningSessions.IRunningItem;
     shutdownLabel?: string;
     //shutdownItemIcon?: LabIcon;
-    translator?: ITranslator;
+    //translator?: ITranslator;
 }) {
     const { runningItem } = props;
     // const runningItem = props.runningItem;
@@ -304,3 +306,23 @@ export namespace IRunningSessions {
         detail?: () => string;
     }
 }
+
+  /**
+   * The default implementation of an `IRenderer`.
+   */
+  export class IoTRenderer extends DirListing.Renderer {
+          /**
+     * Create the DOM node for a dir listing.
+     */
+    createNode(): HTMLElement {
+        const node = document.createElement('div');
+        const header = document.createElement('div');
+        const content = document.createElement('ul');
+        //content.className = CONTENT_CLASS;
+        header.className = HEADER_CLASS;
+        node.appendChild(header);
+        node.appendChild(content);
+        node.tabIndex = 1;
+        return node;
+      }
+  }
