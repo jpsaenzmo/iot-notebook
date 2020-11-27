@@ -10,7 +10,9 @@ import {
 
 import { IDocumentManager } from '@jupyterlab/docmanager';
 
-import { FileBrowserModel, DirListing } from '@jupyterlab/filebrowser'
+import { FileBrowserModel } from '@jupyterlab/filebrowser'
+
+import { IoTDirListing } from './iot-notebook-sidebar'
 
 import { LabIcon } from '@jupyterlab/ui-components';
 
@@ -30,7 +32,6 @@ export const iotaeIcon = new LabIcon({
 
 import iotIconSvgStr from '../style/icons/iot-plain.svg';
 import iotIconAESvgStr from '../style/icons/iot-ae.svg';
-import { IoTRenderer } from './iot-notebook-sidebar';
 
 /**
  * Initialization data for the iot-notebook:factory extension.
@@ -47,13 +48,8 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
       manager: docManager
     });
 
-    if (model != null) {
-      const iotRenderer = new IoTRenderer();
-      const dirlisting = new DirListing({ model });
-      dirlisting.id = 'jp-iot-dirlisting';
-      dirlisting.title.icon = iotIcon;
-      app.shell.add(dirlisting, 'left', { rank: 150 });
-    }
+    const dirlisting = new IoTDirListing(model);
+    app.shell.add(dirlisting, 'left', { rank: 150 });
   }
 };
 

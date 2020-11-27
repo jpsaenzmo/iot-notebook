@@ -1,20 +1,18 @@
-import { Token } from '@lumino/coreutils';
+import React from 'react';
 
-import { ReactWidget, UseSignal } from '@jupyterlab/apputils';
+import { ReactWidget, ToolbarButtonComponent } from '@jupyterlab/apputils';
 
-import * as React from 'react';
+import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
-//import { nullTranslator, ITranslator } from '@jupyterlab/translation';
+import { Message } from '@lumino/messaging';
 
-import { ISignal } from '@lumino/signaling';
+import { toArray } from '@lumino/algorithm';
 
-import { LabIcon } from '@jupyterlab/ui-components';
+import { Contents } from '@jupyterlab/services';
 
-import { DirListing } from '@jupyterlab/filebrowser'
+import { refreshIcon } from '@jupyterlab/ui-components';
 
-import { DisposableDelegate, IDisposable } from '@lumino/disposable';
-
-import { iotIcon } from './index'
+import { iotIcon } from './index';
 
 /**
  * The class name added to a running widget.
@@ -56,139 +54,94 @@ const ITEM_CLASS = 'jp-iotsidebar-item';
  */
 const ITEM_LABEL_CLASS = 'jp-iotsidebar-itemLabel';
 
-/* tslint:disable */
 /**
- * The running sessions token.
+ * The class name added to a running session item label.
  */
-export const IRunningSessionManagers = new Token<IRunningSessionManagers>(
-    '@jupyterlab/running:IRunningSessionManagers'
-);
-/* tslint:enable */
+const ARCHITECTURAL_ELEMENTS = ['Application & Cloud Services', 'Devices', 'Gateway', 'Undefined'];
 
-/**
-* The running interface.
-*/
-export interface IRunningSessionManagers {
-    /**
-     * Add a running item manager.
-     *
-     * @param manager - The running item manager.
-     *
-     */
-    add(manager: IRunningSessions.IManager): IDisposable;
-    /**
-     * Return an array of managers.
-     */
-    items(): ReadonlyArray<IRunningSessions.IManager>;
-}
+export class IoTDirListing extends ReactWidget {
 
-export class RunningSessionManagers implements IRunningSessionManagers {
-    /**
-     * Add a running item manager.
-     *
-     * @param manager - The running item manager.
-     *
-     */
-    add(manager: IRunningSessions.IManager): IDisposable {
-        this._managers.push(manager);
-        return new DisposableDelegate(() => {
-            const i = this._managers.indexOf(manager);
-
-            if (i > -1) {
-                this._managers.splice(i, 1);
-            }
-        });
-    }
-
-    /**
-     * Return an iterator of launcher items.
-     */
-    items(): ReadonlyArray<IRunningSessions.IManager> {
-        return this._managers;
-    }
-
-    private _managers: IRunningSessions.IManager[] = [];
-}
-
-/**
- * A notebook widget extension that adds a button to the sidebar.
- */
-export class IoTSideBar extends ReactWidget {
-    constructor(managers: IRunningSessionManagers, 
-        //translator?: ITranslator
-        ) {
+    constructor(model: FileBrowserModel) {
         super();
-        console.log('entra');
         this.id = 'iotsidebar';
         this.title.icon = iotIcon;
         this.title.caption = 'IoT Architecture';
         this.title.closable = true;
-
-        this.managers = managers;
-        if (this.managers == null) {
-            console.log('managers is null');
-        }
-
-        //this.translator = translator || nullTranslator;
-
         this.addClass(WIDGET_CLASS);
+
+        this._model = model;
     }
 
     render() {
-
         return (
-            <RunningSessionsComponent
-                managers={this.managers}
-                //translator={this.translator}
-            />
+            <IoTNotebooksComponent model={this.model} />
         );
     }
 
-    private managers: IRunningSessionManagers;
-    //protected translator: ITranslator;
+    /**
+    * Get the model used by the listing.
+    */
+    get model(): FileBrowserModel {
+        return this._model;
+    }
+
+    /**
+    * A message handler invoked on an `'after-attach'` message.
+    */
+    protected onAfterShow(msg: Message): void {
+        this.update();
+    }
+
+    private _model: FileBrowserModel;
 }
 
-function RunningSessionsComponent(props: {
-    managers: IRunningSessionManagers;
-    //translator?: ITranslator;
+function IoTNotebooksComponent(props: {
+    model: FileBrowserModel
 }) {
-    //const translator = props.translator || nullTranslator;
-    //const trans = translator.load('jupyterlab');
+    const items = toArray(props.model.items());
+    const itemsGroupped = groupItemsByAE(items);
+    console.log(itemsGroupped)
+    console.log("items length: " + items.length);
     return (
         <>
-            <div className={HEADER_CLASS}>
-                {/*<ToolbarButtonComponent
-            tooltip={trans.__('Refresh List')}
-            icon={refreshIcon}
-            onClick={() =>
-              props.managers.items().forEach(manager => manager.refreshRunning())
-            }
-        />*/}
+            <div className={HEADER_CLASS}>{
+                <ToolbarButtonComponent
+                    tooltip='Refresh List'
+                    icon={refreshIcon}
+                    onClick={() =>
+                        console.log("Click on the refresh button")
+                    }
+                />}
             </div>
-            {props.managers.items().map(manager => (
-                <Section
-                    key={manager.name}
-                    manager={manager}
-                    //translator={props.translator}
-                />
+            {toArray(ARCHITECTURAL_ELEMENTS).map(element => (
+                <Section key={element} name={element} items={items} />
             ))}
         </>
     );
 }
 
-function Section(props: { manager: IRunningSessions.IManager; 
-    //translator?: ITranslator; 
+function groupItemsByAE(items: Contents.IModel[]): {} {
+    items.forEach(item => {
+        if (item.type === 'notebook') {
+            console.log("type: " + item.path);
+        }
+    }
+    );
+    return {}
+}
+
+function Section(props: {
+    name: String;
+    items: Contents.IModel[]
 }) {
-    //const translator = props.translator || nullTranslator;
-    //const trans = translator.load('jupyterlab');
     return (
         <div className={SECTION_CLASS}>
             <>
                 <header className={SECTION_HEADER_CLASS}>
-                    <h2>{props.manager.name}</h2>
+                    <h2>{props.name}</h2>
                 </header>
                 <div className={CONTAINER_CLASS}>
-                    <List manager={props.manager}></List>
+                    <List items={props.items} />
                 </div>
             </>
         </div>
@@ -196,133 +149,33 @@ function Section(props: { manager: IRunningSessions.IManager;
 }
 
 function List(props: {
-    manager: IRunningSessions.IManager;
-    shutdownLabel?: string;
-    shutdownAllLabel?: string;
-    //translator?: ITranslator;
+    items: Contents.IModel[]
 }) {
-    return (
-        <UseSignal signal={props.manager.runningChanged}>
-            {() => (
-                <ListView runningItems={props.manager.running()}
-                    //translator={props.translator}
-                />
-            )}
-        </UseSignal>
-    );
+    return (<ListView items={props.items} />);
 }
 
 function ListView(props: {
-    runningItems: IRunningSessions.IRunningItem[];
-    //translator?: ITranslator;
+    items: Contents.IModel[]
 }) {
     return (
         <ul className={LIST_CLASS}>
-            {props.runningItems.map((item, i) => (
-                <Item
-                    key={i}
-                    runningItem={item}
-                    //translator={props.translator}
-                />
-            ))}
+            <Item item={props.items[0]} />
         </ul>
     );
 }
 
 function Item(props: {
-    runningItem: IRunningSessions.IRunningItem;
-    shutdownLabel?: string;
-    //shutdownItemIcon?: LabIcon;
-    //translator?: ITranslator;
+    item: Contents.IModel
 }) {
-    const { runningItem } = props;
-    // const runningItem = props.runningItem;
-    // const icon = LabIcon;
-    // const detail = runningItem.detail?.();
-    //const translator = props.translator || nullTranslator;
-    //const trans = translator.load('jupyterlab');
-    // const shutdownLabel = props.shutdownLabel || trans.__('Shut Down');
-    // const shutdownItemIcon = props.shutdownItemIcon || closeIcon;
-
     return (
         <li className={ITEM_CLASS}>
-            {//<iotaeIcon.react tag="span" stylesheet="runningItem" />
-            }
             <span
                 className={ITEM_LABEL_CLASS}
-                title={runningItem.labelTitle ? runningItem.labelTitle() : ''}
-                onClick={() => console.log('Hiciste click')}
+                title={props.item.name}
+                onClick={() => console.log('Click over an item')}
             >
-                {runningItem.label()}
+                {props.item.name}
             </span>
         </li>
     );
 }
-
-/**
- * The namespace for the `IRunningSessions` class statics.
- */
-export namespace IRunningSessions {
-    /**
-     * A manager of running items grouped under a single section.
-     */
-    export interface IManager {
-        // Name that is shown to the user in plural
-        name: string;
-        // called when the shutdown all button is pressed
-        shutdownAll(): void;
-        // list the running models.
-        running(): IRunningItem[];
-        // Force a refresh of the running models.
-        refreshRunning(): void;
-        // A signal that should be emitted when the item list has changed.
-        runningChanged: ISignal<any, any>;
-        // A string used to describe the shutdown action.
-        shutdownLabel?: string;
-        // A string used to describe the shutdown all action.
-        shutdownAllLabel?: string;
-        // A string used as the body text in the shutdown all confirmation dialog.
-        shutdownAllConfirmationText?: string;
-        // The icon to show for shutting down an individual item in this section.
-        shutdownItemIcon?: LabIcon;
-    }
-
-    /**
-     * A running item.
-     */
-    export interface IRunningItem {
-        // called when the running item is clicked
-        open: () => void;
-        // called when the shutdown button is pressed on a particular item
-        shutdown: () => void;
-        // LabIcon to use as the icon
-        icon: () => LabIcon;
-        // called to determine the label for each item
-        label: () => string;
-        // called to determine the `title` attribute for each item, which is revealed on hover
-        labelTitle?: () => string;
-        // called to determine the `detail` attribute which is shown optionally
-        // in a column after the label
-        detail?: () => string;
-    }
-}
-
-  /**
-   * The default implementation of an `IRenderer`.
-   */
-  export class IoTRenderer extends DirListing.Renderer {
-          /**
-     * Create the DOM node for a dir listing.
-     */
-    createNode(): HTMLElement {
-        const node = document.createElement('div');
-        const header = document.createElement('div');
-        const content = document.createElement('ul');
-        //content.className = CONTENT_CLASS;
-        header.className = HEADER_CLASS;
-        node.appendChild(header);
-        node.appendChild(content);
-        node.tabIndex = 1;
-        return node;
-      }
-  }
