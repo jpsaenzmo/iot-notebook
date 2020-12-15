@@ -71,7 +71,7 @@ const iotfactory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 
 /**
  * The footer button extension for the IoT Code Cell.
-*/
+ */
 const iotcellfooter: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:cellfooter',
   requires: [INotebookTracker],

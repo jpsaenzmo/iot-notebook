@@ -14,6 +14,8 @@ import { refreshIcon } from '@jupyterlab/ui-components';
 
 import { iotIcon } from './index';
 
+import { ContentsManager } from '@jupyterlab/services';
+
 /**
  * The class name added to a running widget.
  */
@@ -55,9 +57,14 @@ const ITEM_CLASS = 'jp-iotsidebar-item';
 const ITEM_LABEL_CLASS = 'jp-iotsidebar-itemLabel';
 
 /**
- * The class name added to a running session item label.
+ * The Architectural Elements name to display on the labels.
  */
-const ARCHITECTURAL_ELEMENTS = ['Application & Cloud Services', 'Devices', 'Gateway', 'Undefined'];
+const ARCHITECTURAL_ELEMENTS_LBL = ['Application & Cloud Services', 'Devices', 'Gateway', 'Undefined'];
+
+/**
+ * The Architectural Elements indexes.
+ */
+const ARCHITECTURAL_ELEMENTS = ['app-and-cloud', 'device', 'gateway', 'undefined'];
 
 export class IoTDirListing extends ReactWidget {
 
@@ -99,9 +106,7 @@ function IoTNotebooksComponent(props: {
     model: FileBrowserModel
 }) {
     const items = toArray(props.model.items());
-    const itemsGroupped = groupItemsByAE(items);
-    console.log(itemsGroupped)
-    console.log("items length: " + items.length);
+    const itemsGroupped: { [id: string]: Contents.IModel[] } = groupItemsByAE(items);
     return (
         <>
             <div className={HEADER_CLASS}>{
@@ -113,21 +118,37 @@ function IoTNotebooksComponent(props: {
                     }
                 />}
             </div>
-            {toArray(ARCHITECTURAL_ELEMENTS).map(element => (
-                <Section key={element} name={element} items={items} />
-            ))}
+            {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (
+                <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={itemsGroupped[ARCHITECTURAL_ELEMENTS[index]]} />
+            ))
+            }
         </>
     );
 }
 
 function groupItemsByAE(items: Contents.IModel[]): {} {
+    const contents = new ContentsManager();
+    const elements: { [id: string]: Contents.IModel[] } = {};
+    toArray(ARCHITECTURAL_ELEMENTS).map(element => (
+        elements[element] = []
+    ));
     items.forEach(item => {
+        //console.log(item.content);
         if (item.type === 'notebook') {
-            console.log("type: " + item.path);
+
+            const ae = contents.get(item.name);
+            elements[ae + ''].push(item);
+
+            //var ae = contents.get(item.name).then((value: Contents.IModel) => {
+            //return value.content.metadata.architectural_element;
+            // elements[value.content.metadata.architectural_element + ''].push(item)
+            //});
+            //console.log(ae);
+            // elements[ae + ''].push(item);
         }
     }
     );
-    return {}
+    return elements;
 }
 
 function Section(props: {
@@ -159,7 +180,12 @@ function ListView(props: {
 }) {
     return (
         <ul className={LIST_CLASS}>
-            <Item item={props.items[0]} />
+            {props.items.map((item, i) => (
+                <Item
+                    key={i}
+                    item={item}
+                />
+            ))}
         </ul>
     );
 }
