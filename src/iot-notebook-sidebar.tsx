@@ -66,6 +66,10 @@ const ARCHITECTURAL_ELEMENTS_LBL = ['Application & Cloud Services', 'Devices', '
  */
 const ARCHITECTURAL_ELEMENTS = ['app-and-cloud', 'device', 'gateway', 'undefined'];
 
+var elements: { [id: string]: Contents.IModel[] } = {};
+
+//var numElements = 0;
+
 export class IoTDirListing extends ReactWidget {
 
     constructor(model: FileBrowserModel) {
@@ -77,11 +81,15 @@ export class IoTDirListing extends ReactWidget {
         this.addClass(WIDGET_CLASS);
 
         this._model = model;
+
+
+        //numElements = 0;
+
     }
 
     render() {
         return (
-            <IoTNotebooksComponent model={this.model} />
+            <Welcome model={this._model} />
         );
     }
 
@@ -93,20 +101,116 @@ export class IoTDirListing extends ReactWidget {
     }
 
     /**
-    * A message handler invoked on an `'after-attach'` message.
+    * A message handler invoked on an `'after-show'` message.
     */
     protected onAfterShow(msg: Message): void {
-        this.update();
+        this.update;
     }
 
     private _model: FileBrowserModel;
 }
 
+
+interface IWelcomeProps {
+    model: FileBrowserModel;
+}
+
+interface IWelcomeState {
+    lista: { [id: string]: Contents.IModel[] };
+}
+
+
+class Welcome extends React.Component<IWelcomeProps, IWelcomeState> {
+
+    contents = new ContentsManager();
+
+    constructor(props: any) {
+        super(props);
+        // No llames this.setState() aquí!
+        this.state = { lista: {} };
+
+        elements = {};
+        toArray(ARCHITECTURAL_ELEMENTS).map(element => (
+            elements[element] = []
+        ));
+    }
+
+    componentDidMount() {
+
+
+
+
+        //const items = toArray(this.props.model.items());
+
+        
+
+        toArray(this.props.model.items()).forEach(item => {
+            if (item.type === 'notebook') {
+
+
+
+                const ae = test(this.contents, item.name);
+
+                //contents.get(item.name);
+
+                console.log("ae" + ae);
+
+
+
+                this.contents.get(item.name).then((value: Contents.IModel) => {
+                    // populateList(value.content.metadata.architectural_element, value, numNotebooks);
+                    elements[value.content.metadata.architectural_element].push(item);
+                    if (value != null) {
+                        console.log("Trata de hacer render");
+                    }
+                    this.setState({ lista: elements });
+                    //numElements++;
+
+                });
+
+            }
+        }
+        );
+    }
+
+    render() {
+        console.log("Entra al rendenkjkljlr");
+        return (
+
+            <>
+                <div className={HEADER_CLASS}>{
+                    <ToolbarButtonComponent
+                        tooltip='Refresh List'
+                        icon={refreshIcon}
+                        onClick={() =>
+                            console.log("Click on the refresh button")
+                        }
+                    />
+                }
+                </div>
+                <div id='ae-section'>
+                    {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (
+                        <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={this.state.lista[ARCHITECTURAL_ELEMENTS[index]]} />
+                    ))
+                    }
+                </div>
+            </>);
+    }
+}
+
+
+
+/*
 function IoTNotebooksComponent(props: {
     model: FileBrowserModel
 }) {
-    const items = toArray(props.model.items());
-    const itemsGroupped: { [id: string]: Contents.IModel[] } = groupItemsByAE(items);
+
+
+
+    //var numNotebooks = 0;
+
+    //items.forEach(item => { if (item.type === 'notebook') { numNotebooks++; } });
+
     return (
         <>
             <div className={HEADER_CLASS}>{
@@ -116,41 +220,39 @@ function IoTNotebooksComponent(props: {
                     onClick={() =>
                         console.log("Click on the refresh button")
                     }
-                />}
-            </div>
-            {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (
-                <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={itemsGroupped[ARCHITECTURAL_ELEMENTS[index]]} />
-            ))
+                />
             }
+            </div>
+            <div id='ae-section'>
+                {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (
+                    <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={elements[ARCHITECTURAL_ELEMENTS[index]]} />
+                ))
+                }
+            </div>
         </>
     );
 }
-
-function groupItemsByAE(items: Contents.IModel[]): {} {
-    const contents = new ContentsManager();
-    const elements: { [id: string]: Contents.IModel[] } = {};
-    toArray(ARCHITECTURAL_ELEMENTS).map(element => (
-        elements[element] = []
-    ));
-    items.forEach(item => {
-        //console.log(item.content);
-        if (item.type === 'notebook') {
-
-            const ae = contents.get(item.name);
-            elements[ae + ''].push(item);
-
-            //var ae = contents.get(item.name).then((value: Contents.IModel) => {
-            //return value.content.metadata.architectural_element;
-            // elements[value.content.metadata.architectural_element + ''].push(item)
-            //});
-            //console.log(ae);
-            // elements[ae + ''].push(item);
-        }
-    }
-    );
-    return elements;
+*/
+async function test(contents: ContentsManager, item: string) {
+    const ae = await contents.get(item);
+    return ae.content.metadata.architectural_element;
 }
 
+/*
+function groupItemsByAE(items: Contents.IModel[]) {
+
+}
+
+function populateList(ae: string, item: Contents.IModel, lenItems: number) {
+    numElements++;
+    if (item != null) {
+        elements[ae].push(item);
+    }
+    if (lenItems - numElements == 0) {
+        window.location.reload;
+    }
+}
+*/
 function Section(props: {
     name: String;
     items: Contents.IModel[]
