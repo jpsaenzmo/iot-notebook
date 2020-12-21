@@ -4,17 +4,15 @@ import { ReactWidget, ToolbarButtonComponent } from '@jupyterlab/apputils';
 
 import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
-import { Message } from '@lumino/messaging';
-
 import { toArray } from '@lumino/algorithm';
 
 import { Contents } from '@jupyterlab/services';
 
-import { refreshIcon } from '@jupyterlab/ui-components';
-
 import { iotIcon } from './index';
 
 import { ContentsManager } from '@jupyterlab/services';
+
+import { JupyterFrontEnd } from '@jupyterlab/application';
 
 /**
  * The class name added to a running widget.
@@ -68,7 +66,7 @@ const ARCHITECTURAL_ELEMENTS = ['app-and-cloud', 'device', 'gateway', 'undefined
 
 export class IoTDirListing extends ReactWidget {
 
-    constructor(model: FileBrowserModel) {
+    constructor(app: JupyterFrontEnd, model: FileBrowserModel) {
         super();
         this.id = 'iotsidebar';
         this.title.icon = iotIcon;
@@ -76,11 +74,12 @@ export class IoTDirListing extends ReactWidget {
         this.title.closable = true;
         this.addClass(WIDGET_CLASS);
 
+        this._app = app;
         this._model = model;
     }
 
     render() {
-        return (<IoTNotebooksComponent model={this._model} />);
+        return (<IoTNotebooksComponent app={this._app} model={this._model} />);
     }
 
     /**
@@ -90,17 +89,12 @@ export class IoTDirListing extends ReactWidget {
         return this._model;
     }
 
-    /**
-    * A message handler invoked on an `'after-show'` message.
-    */
-    protected onAfterShow(msg: Message): void {
-
-    }
-
+    private _app: JupyterFrontEnd;
     private _model: FileBrowserModel;
 }
 
 interface IIoTNotebookProps {
+    app: JupyterFrontEnd;
     model: FileBrowserModel;
 }
 
@@ -122,6 +116,34 @@ class IoTNotebooksComponent extends React.Component<IIoTNotebookProps, IIoTNoteb
         toArray(ARCHITECTURAL_ELEMENTS).map(element => (
             this.elements[element] = []
         ));
+
+        const { services } = props.model.manager;
+        services.contents.fileChanged.connect(this._onFileChanged, this);
+    }
+
+    private initElements(): void {
+        this.elements = {};
+        toArray(ARCHITECTURAL_ELEMENTS).map(element => (
+            this.elements[element] = []
+        ));
+    }
+
+    /**
+    * Handle a change on the contents manager.
+    */
+    private _onFileChanged(
+        sender: Contents.IManager,
+        change: Contents.IChangedArgs
+    ): void {
+        this.initElements();
+        toArray(this.props.model.items()).forEach(item => {
+            if (item.type === 'notebook') {
+                this.contents.get(item.name).then((value: Contents.IModel) => {
+                    this.elements[value.content.metadata.architectural_element].push(item);
+                    this.setState({ lista: this.elements });
+                });
+            }
+        });
     }
 
     componentDidMount() {
@@ -139,17 +161,11 @@ class IoTNotebooksComponent extends React.Component<IIoTNotebookProps, IIoTNoteb
         return (
             <>
                 <div className={HEADER_CLASS}>{
-                    <ToolbarButtonComponent
-                        tooltip='Refresh List'
-                        icon={refreshIcon}
-                        onClick={() =>
-                            console.log("Click on the refresh button")
-                        }
-                    />
+                    <ToolbarButtonComponent/>
                 }
                 </div>
                 {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (
-                    <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={this.elements[ARCHITECTURAL_ELEMENTS[index]]} />
+                    <Section key={ARCHITECTURAL_ELEMENTS[index]} name={element} items={this.elements[ARCHITECTURAL_ELEMENTS[index]]} app={this.props.app} />
                 ))
                 }
             </>);
@@ -158,7 +174,8 @@ class IoTNotebooksComponent extends React.Component<IIoTNotebookProps, IIoTNoteb
 
 function Section(props: {
     name: String;
-    items: Contents.IModel[]
+    items: Contents.IModel[];
+    app: JupyterFrontEnd
 }) {
     return (
         <div className={SECTION_CLASS}>
@@ -167,7 +184,7 @@ function Section(props: {
                     <h2>{props.name}</h2>
                 </header>
                 <div className={CONTAINER_CLASS}>
-                    <List items={props.items} />
+                    <List items={props.items} app={props.app} />
                 </div>
             </>
         </div>
@@ -175,13 +192,15 @@ function Section(props: {
 }
 
 function List(props: {
-    items: Contents.IModel[]
+    items: Contents.IModel[];
+    app: JupyterFrontEnd
 }) {
-    return (<ListView items={props.items} />);
+    return (<ListView items={props.items} app={props.app} />);
 }
 
 function ListView(props: {
-    items: Contents.IModel[]
+    items: Contents.IModel[];
+    app: JupyterFrontEnd
 }) {
     return (
         <ul className={LIST_CLASS}>
@@ -189,6 +208,7 @@ function ListView(props: {
                 <Item
                     key={i}
                     item={item}
+                    app={props.app}
                 />
             ))}
         </ul>
@@ -196,14 +216,18 @@ function ListView(props: {
 }
 
 function Item(props: {
-    item: Contents.IModel
+    item: Contents.IModel;
+    app: JupyterFrontEnd
 }) {
+    const path = props.item.path;
     return (
         <li className={ITEM_CLASS}>
             <span
                 className={ITEM_LABEL_CLASS}
                 title={props.item.name}
-                onClick={() => console.log('Click over an item')}
+                onClick={
+                    () => void props.app.commands.execute('docmanager:open', { path })
+                }
             >
                 {props.item.name}
             </span>

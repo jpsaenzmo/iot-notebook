@@ -48,7 +48,7 @@ const iotsidebar: JupyterFrontEndPlugin<void> = {
       manager: docManager
     });
 
-    const dirlisting = new IoTDirListing(model);
+    const dirlisting = new IoTDirListing(app, model);
     app.shell.add(dirlisting, 'left', { rank: 150 });
   }
 };

@@ -27,7 +27,6 @@ import {
     TranslationBundle
 } from '@jupyterlab/translation';
 
-
 import { Notebook } from '@jupyterlab/notebook';
 
 /**
@@ -45,7 +44,7 @@ const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
 /**
  * A notebook widget extension that adds a button to the toolbar.
  */
-export class  IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
+export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
 
     /**
      * Create a new extension object.
@@ -70,9 +69,9 @@ export class  IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPa
 
 export class IoTArchitecturalSwitch extends ReactWidget {
 
-    constructor(widget: Notebook, 
+    constructor(widget: Notebook,
         translator?: ITranslator
-        ) {
+    ) {
         super();
         this._trans = (translator || nullTranslator).load('jupyterlab');
         this.addClass(IOTTOOLBAR_ARCHITECTURAL_CLASS);
