@@ -13,7 +13,7 @@ setup(
     author_email='',
     url='',
     install_requires=[
-        'jupyter_client', 'IPython', 'ipykernel'
+        'jupyter_client', 'IPython', 'ipykernel', 'pexpect'
     ],
     classifiers=[
         'Intended Audience :: Developers',

@@ -17,10 +17,11 @@ def install_my_kernel_spec(user=True, prefix=None):
         os.chmod(td, 0o755) # Starts off as 700, not user readable
         with open(os.path.join(td, 'kernel.json'), 'w') as f:
             json.dump(kernel_json, f, sort_keys=True)
-        # TODO: Copy any resources
+
+        # Copy any resources
 
         print('Installing Jupyter kernel spec')
-        KernelSpecManager().install_kernel_spec(td, 'arduino', user=user, replace=True, prefix=prefix)
+        KernelSpecManager().install_kernel_spec(td, 'arduino', user=user, prefix=prefix)
 
 def _is_root():
     try:
