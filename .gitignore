@@ -5,3 +5,4 @@ node_modules/
 *.ipynb
 .ipynb_checkpoints
 *.tsbuildinfo
+sketch/
