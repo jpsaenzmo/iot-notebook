@@ -2,6 +2,7 @@ import argparse
 import json
 import os
 import sys
+import sysconfig
 
 from jupyter_client.kernelspec import KernelSpecManager
 from IPython.utils.tempdir import TemporaryDirectory
@@ -18,7 +19,17 @@ def install_my_kernel_spec(user=True, prefix=None):
         with open(os.path.join(td, 'kernel.json'), 'w') as f:
             json.dump(kernel_json, f, sort_keys=True)
 
-        # Copy any resources
+        with open(sysconfig.get_paths()['purelib'] +'/arduino_kernel/logo-32x32.png', 'rb') as f:
+            data = f.read()
+
+        with open(os.path.join(td, 'logo-32x32.png'), 'wb') as f:
+            f.write(data)
+
+        with open(sysconfig.get_paths()['purelib'] +'/arduino_kernel/logo-64x64.png', 'rb') as f:
+            data = f.read()
+
+        with open(os.path.join(td, 'logo-64x64.png'), 'wb') as f:
+            f.write(data)
 
         print('Installing Jupyter kernel spec')
         KernelSpecManager().install_kernel_spec(td, 'arduino', user=user, prefix=prefix)

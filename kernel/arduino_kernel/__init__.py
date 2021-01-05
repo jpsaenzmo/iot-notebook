@@ -1,4 +1,4 @@
-"""An example Jupyter kernel"""
+"""An Arduino kernel"""
 
 __version__ = '1.1'
 

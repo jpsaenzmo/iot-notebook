@@ -14,11 +14,14 @@ import {
 
 import {
     ToolbarButton,
-    ReactWidget
+    ReactWidget,
+    ISessionContext,
+    ToolbarButtonComponent
 } from '@jupyterlab/apputils';
 
 import {
-    HTMLSelect
+    HTMLSelect,
+    LabIcon
 } from '@jupyterlab/ui-components';
 
 import {
@@ -28,6 +31,19 @@ import {
 } from '@jupyterlab/translation';
 
 import { Notebook } from '@jupyterlab/notebook';
+
+export const board = new LabIcon({
+    name: 'defaultpkg:board',
+    svgstr: boardIconSvgStr
+});
+
+export const boardOff = new LabIcon({
+    name: 'defaultpkg:board-off',
+    svgstr: boardOffIconSvgStr
+});
+
+import boardIconSvgStr from '../style/icons/board.svg';
+import boardOffIconSvgStr from '../style/icons/board-off.svg';
 
 /**
  * The class name added to toolbar cell type dropdown wrapper.
@@ -40,6 +56,11 @@ const IOTTOOLBAR_ARCHITECTURAL_CLASS = 'jp-Notebook-toolbarCellType';
 const IOTTOOLBAR_ARCHITECTURAL_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
 const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
+
+/**
+ * The class name added to toolbar kernel name text.
+ */
+const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 
 /**
  * A notebook widget extension that adds a button to the toolbar.
@@ -57,14 +78,58 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
         });
 
         let switchIoT = new IoTArchitecturalSwitch(panel.content);
+        let boardConn = new BoardConnector(panel.sessionContext);
 
         panel.toolbar.insertItem(11, 'lblIoTAE', button);
         panel.toolbar.insertAfter('lblIoTAE', 'switchIoTAE', switchIoT);
+        panel.toolbar.insertItem(15, 'lblBoardConn', boardConn);
 
         return new DisposableDelegate(() => {
             button.dispose();
         });
     }
+}
+
+export class BoardConnector extends ReactWidget {
+    constructor(sessionContext: ISessionContext) {
+        super();
+        this._board = "Board"
+        this.addClass(TOOLBAR_KERNEL_NAME_CLASS);
+        this._onStatusChanged(sessionContext);
+        sessionContext.statusChanged.connect(this._onStatusChanged, this);
+    }
+
+    private callback = () => {
+
+    };
+
+    /**
+    * Handle a status on a kernel.
+    */
+    private _onStatusChanged(sessionContext: ISessionContext) {
+        this._kernel = sessionContext.kernelDisplayName;
+        this.update();
+    }
+
+    render() {
+        if (this._kernel === 'Arduino') {
+            return (
+                <>
+                    <ToolbarButtonComponent
+                        onClick={this.callback}
+                        tooltip={'Connect to an Arduino board'}
+                        label={this._board}
+                    />
+                    <boardOff.react stylesheet={'toolbarButton'} alignSelf={'normal'} height={'24px'} />
+                </>)
+        }
+        else {
+            return <></>;
+        }
+    }
+
+    private _kernel: string;
+    private _board: string;
 }
 
 export class IoTArchitecturalSwitch extends ReactWidget {

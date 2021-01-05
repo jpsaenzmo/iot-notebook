@@ -10,6 +10,9 @@ from requests.compat import urljoin
 
 from notebook.notebookapp import list_running_servers
 
+from .board import Board, BoardError
+
+SKETCH_FOLDER = '.sketch'
 
 class ArduinoKernel(Kernel):
     implementation = 'Arduino'
@@ -40,7 +43,7 @@ class ArduinoKernel(Kernel):
         #        print(sess['notebook']['name'])
         #        break
         try:
-            os.makedirs('sketch')
+            os.makedirs(SKETCH_FOLDER)
         except FileExistsError:
             pass
         # try:
@@ -63,11 +66,11 @@ class ArduinoKernel(Kernel):
         interrupted = False
         try:
             try:
-                os.makedirs('sketch')
+                os.makedirs(SKETCH_FOLDER)
             except FileExistsError:
                 pass
             if not code.rstrip().startswith('!'):
-                f = open('sketch/sketch.ino', 'w+')
+                f = open(SKETCH_FOLDER+'/sketch.ino', 'w+')
                 f.write(code.rstrip())
                 f.close()
                 try:
@@ -121,7 +124,7 @@ class ArduinoKernel(Kernel):
             return {'status': 'ok', 'execution_count': self.execution_count, 'payload': [], 'user_expressions': {}}
 
     def clean_sketches():
-        if os.path.isfile('./sketch/sketch.ino'):
-            filelist = os.listdir('./sketch')
+        if os.path.isfile('./'+SKETCH_FOLDER+'/sketch.ino'):
+            filelist = os.listdir('./'+SKETCH_FOLDER)
             for f in filelist:
                 os.remove(os.path.join(mydir, f))

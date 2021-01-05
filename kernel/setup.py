@@ -20,4 +20,5 @@ setup(
         'License :: OSI Approved :: BSD License',
         'Programming Language :: Python :: 3',
     ],
+    include_package_data=True,
 )
