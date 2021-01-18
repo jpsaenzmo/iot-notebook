@@ -61,7 +61,6 @@ const iotfactory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   provides: NotebookPanel.IContentFactory,
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
-
     console.log('JupyterLab extension iot-notebook:factory is activated!');
 
     const { commands } = app;

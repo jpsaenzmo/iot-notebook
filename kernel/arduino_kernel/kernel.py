@@ -69,7 +69,15 @@ class ArduinoKernel(Kernel):
                 os.makedirs(SKETCH_FOLDER)
             except FileExistsError:
                 pass
-            if not code.rstrip().startswith('!'):
+            if code == 'arduino-cli board list':
+                try:
+                    sp = subprocess.check_output(
+                        'arduino-cli board list', stderr=subprocess.STDOUT, shell=False)
+                except subprocess.CalledProcessError as e:
+                    raise RuntimeError("command '{}' return with error (code {}): {}".format(
+                        e.cmd, e.returncode, e.output))
+                output = sp.decode(sys.stdout.encoding)
+            else:
                 f = open(SKETCH_FOLDER+'/sketch.ino', 'w+')
                 f.write(code.rstrip())
                 f.close()
@@ -80,13 +88,6 @@ class ArduinoKernel(Kernel):
                     raise RuntimeError("command '{}' return with error (code {}): {}".format(
                         e.cmd, e.returncode, e.output))
                 output = sp.decode(sys.stdout.encoding)
-            else:
-                try:
-                    sp = subprocess.check_output(code.rstrip().split(
-                        '!', 1)[1], stderr=subprocess.STDOUT, shell=True)
-                    output = sp.decode(sys.stdout.encoding)
-                except subprocess.CalledProcessError as e:
-                    output = e.returncode
         except KeyboardInterrupt:
             # self.bash_wrapper.child.sendintr()
             interrupted = True

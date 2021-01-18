@@ -16,7 +16,9 @@ import {
   ToolbarButton,
   ReactWidget,
   ISessionContext,
-  ToolbarButtonComponent
+  ToolbarButtonComponent,
+  InputDialog,
+  Dialog
 } from '@jupyterlab/apputils';
 
 import {
@@ -65,6 +67,8 @@ const IOTTOOLBAR_ARCHITECTURAL_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDrop
 
 const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
 
+const ARDUINO_BOARD_KEY = 'arduino_board';
+
 /**
  * The class name added to toolbar kernel name text.
  */
@@ -86,7 +90,7 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
     });
 
     let switchIoT = new IoTArchitecturalSwitch(panel.content);
-    let boardConn = new BoardConnector(panel.sessionContext);
+    let boardConn = new BoardConnector(panel.sessionContext, panel.content);
 
     panel.toolbar.insertItem(11, 'lblIoTAE', button);
     panel.toolbar.insertAfter('lblIoTAE', 'switchIoTAE', switchIoT);
@@ -99,9 +103,9 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
 }
 
 export class BoardConnector extends ReactWidget {
-  constructor(sessionContext: ISessionContext) {
+  constructor(sessionContext: ISessionContext, widget: Notebook) {
     super();
-    this._board = "Board"
+    this._board = 'Board'
     this.addClass(TOOLBAR_KERNEL_NAME_CLASS);
     this._onStatusChanged(sessionContext);
     sessionContext.statusChanged.connect(this._onStatusChanged, this);
@@ -110,11 +114,33 @@ export class BoardConnector extends ReactWidget {
       this
     );
     this._kernelModel = new KernelModel(sessionContext);
+    this._notebook = widget;
   }
 
   private callback = () => {
     this._kernelModel.execute('arduino-cli board list');
-    console.log(this._kernelModel.boardList);
+    if (this._kernelModel.boardList != null) {
+      console.log(this._kernelModel.boardList);
+      return InputDialog.getItem({
+        title: 'Pick an Arduino Board',
+        items: this._kernelModel.boardList
+      }).then(value => {
+        this._board = value.value.split('\t')[3];
+        this._notebook.model.metadata.set(ARDUINO_BOARD_KEY, value.value.split('\t')[0]);
+      });
+    }
+    else {
+      const buttons = [
+        Dialog.okButton({ label: 'Ok' })
+      ];
+      console.log("Paila, no hay ninguna board conectada");
+      const dialog = new Dialog({
+        title: 'Paila, no hay ninguna board conectada',
+        buttons
+      }
+      );
+      dialog.launch();
+    }
   };
 
   /**
@@ -146,6 +172,7 @@ export class BoardConnector extends ReactWidget {
   private _board: string;
 
   private _kernelModel: KernelModel;
+  private _notebook: Notebook;
 }
 
 export class IoTArchitecturalSwitch extends ReactWidget {
@@ -249,6 +276,7 @@ export class KernelModel {
         var result = this._output.text.toString().split('Name ')[1];
         if (result != '') {
           this._boardList = result.split('\n').filter(obj => obj !== '');
+
         }
       case 'execute_result':
       case 'display_data':

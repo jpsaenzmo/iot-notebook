@@ -189,7 +189,6 @@ export function run(
     return promise;
 }
 
-
 /**
  * Extend default implementation of a cell footer.
  */
@@ -297,8 +296,8 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
  */
 class IoTNotebook extends Notebook {
 
-    constructor(options?: Notebook.IOptions) {
-        super(options);
+    onBeforeAttach() {
+        this.model.metadata.set('arduino_board', "");
     }
 
     onActivateRequest() {
