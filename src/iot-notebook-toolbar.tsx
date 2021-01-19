@@ -79,6 +79,8 @@ const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
  */
 export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
 
+
+
   /**
    * Create a new extension object.
    */
@@ -90,7 +92,10 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
     });
 
     let switchIoT = new IoTArchitecturalSwitch(panel.content);
+
+
     let boardConn = new BoardConnector(panel.sessionContext, panel.content);
+    boardConn.stateChanged.connect(this._logMessage, this);
 
     panel.toolbar.insertItem(11, 'lblIoTAE', button);
     panel.toolbar.insertAfter('lblIoTAE', 'switchIoTAE', switchIoT);
@@ -100,6 +105,16 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
       button.dispose();
     });
   }
+
+  private _logMessage(): void {
+    this._stateChanged.emit('hola');
+  }
+
+  public get stateChanged(): ISignal<this, String> {
+    return this._stateChanged;
+  }
+
+  private _stateChanged = new Signal<this, String>(this);
 }
 
 export class BoardConnector extends ReactWidget {
@@ -127,6 +142,7 @@ export class BoardConnector extends ReactWidget {
       }).then(value => {
         this._board = value.value.split('\t')[3];
         this._notebook.model.metadata.set(ARDUINO_BOARD_KEY, value.value.split('\t')[0]);
+        this._stateChanged.emit(this._board);
       });
     }
     else {
@@ -168,11 +184,17 @@ export class BoardConnector extends ReactWidget {
     }
   }
 
+  public get stateChanged(): ISignal<this, String> {
+    return this._stateChanged;
+  }
+
   private _kernel: string;
   private _board: string;
 
   private _kernelModel: KernelModel;
   private _notebook: Notebook;
+
+  private _stateChanged = new Signal<this, String>(this);
 }
 
 export class IoTArchitecturalSwitch extends ReactWidget {

@@ -9,14 +9,11 @@ import {
     NotebookPanel,
     NotebookActions,
     Notebook,
-    INotebookModel,
-    //CellTypeSwitcher
 } from '@jupyterlab/notebook';
 
 import {
     ICellFooter,
     Cell,
-    ICellModel,
     CodeCell,
     MarkdownCell,
     ICodeCellModel
@@ -26,7 +23,7 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-import { ReactWidget, ISessionContext, Dialog, showDialog, Clipboard } from '@jupyterlab/apputils';
+import { ReactWidget, ISessionContext, Dialog, showDialog } from '@jupyterlab/apputils';
 
 import { each, toArray } from '@lumino/algorithm';
 
@@ -39,15 +36,7 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 import { KernelMessage } from '@jupyterlab/services';
 
 import { ArrayExt } from '@lumino/algorithm';
-
-import { JSONObject } from '@lumino/coreutils';
-
-/**
- * The mimetype used for Jupyter cell data.
- */
-const JUPYTER_CELL_MIME = 'application/vnd.jupyter.cells';
-
-import * as nbformat from '@jupyterlab/nbformat';
+import { IoTToolbar } from './iot-notebook-toolbar';
 
 /**
  * The CSS classes added to the cell footer.
@@ -133,7 +122,6 @@ export function activateCommands(
             label: 'Is prerequisite',
             execute: args => {
                 const current = getCurrent(args);
-
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set(IS_PREREQUISITE, args.state);
@@ -217,6 +205,10 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isLinked = false;
     }
 
+    _logMessage(): void {
+        console.log('Arduino board connected vamoos!');
+    }
+
     changeIsPrerequisite(prerequisite: boolean) {
         this.isPrerequisite = prerequisite;
         this.update();
@@ -269,11 +261,12 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
     private readonly commands: CommandRegistry;
 
     constructor(
-        commands: CommandRegistry,
+        commands: CommandRegistry, toolbar: IoTToolbar,
         options?: Cell.ContentFactory.IOptions | undefined
     ) {
         super(options);
         this.commands = commands;
+        this._toolbar = toolbar;
     }
 
     /**
@@ -287,18 +280,18 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
      * Create a new cell footer for the parent widget.
      */
     createCellFooter(): ICellFooter {
-        return new CellFooterWithButton(this.commands);
+        const footer = new CellFooterWithButton(this.commands);
+        this._toolbar.stateChanged.connect(footer._logMessage, this);
+        return footer;
     }
+
+    private _toolbar: IoTToolbar;
 }
 
 /**
  * Extend the default implementation of a `Notebook`.
  */
 class IoTNotebook extends Notebook {
-
-    onBeforeAttach() {
-        this.model.metadata.set('arduino_board', "");
-    }
 
     onActivateRequest() {
         each(this.widgets, widget => {
@@ -386,26 +379,6 @@ namespace Private {
             const rect = state.activeCell.inputArea.node.getBoundingClientRect();
 
             notebook.scrollToPosition(rect.bottom, 45);
-        }
-    }
-
-    /**
-     * Clone a cell model.
-     */
-    export function cloneCell(
-        model: INotebookModel,
-        cell: ICellModel
-    ): ICellModel {
-        switch (cell.type) {
-            case 'code':
-                // TODO why isn't modeldb or id passed here?
-                return model.contentFactory.createCodeCell({ cell: cell.toJSON() });
-            case 'markdown':
-                // TODO why isn't modeldb or id passed here?
-                return model.contentFactory.createMarkdownCell({ cell: cell.toJSON() });
-            default:
-                // TODO why isn't modeldb or id passed here?
-                return model.contentFactory.createRawCell({ cell: cell.toJSON() });
         }
     }
 
@@ -586,178 +559,5 @@ namespace Private {
         } else {
             cells.insert(index + 1, newCell);
         }
-    }
-
-    /**
-     * Copy or cut the selected cell data to the application clipboard.
-     *
-     * @param notebook - The target notebook widget.
-     *
-     * @param cut - Whether to copy or cut.
-     */
-    export function copyOrCut(notebook: Notebook, cut: boolean): void {
-        if (!notebook.model || !notebook.activeCell) {
-            return;
-        }
-
-        const state = getState(notebook);
-        const clipboard = Clipboard.getInstance();
-
-        notebook.mode = 'command';
-        clipboard.clear();
-
-        const data = notebook.widgets
-            .filter(cell => notebook.isSelectedOrActive(cell))
-            .map(cell => cell.model.toJSON())
-            .map(cellJSON => {
-                if ((cellJSON.metadata as JSONObject).deletable !== undefined) {
-                    delete (cellJSON.metadata as JSONObject).deletable;
-                }
-                return cellJSON;
-            });
-
-        clipboard.setData(JUPYTER_CELL_MIME, data);
-        if (cut) {
-            deleteCells(notebook);
-        } else {
-            notebook.deselectAll();
-        }
-        handleState(notebook, state);
-    }
-
-    /**
-     * Change the selected cell type(s).
-     *
-     * @param notebook - The target notebook widget.
-     *
-     * @param value - The target cell type.
-     *
-     * #### Notes
-     * It should preserve the widget mode.
-     * This action can be undone.
-     * The existing selection will be cleared.
-     * Any cells converted to markdown will be unrendered.
-     */
-    export function changeCellType(
-        notebook: Notebook,
-        value: nbformat.CellType
-    ): void {
-        const model = notebook.model!;
-        const cells = model.cells;
-
-        cells.beginCompoundOperation();
-        notebook.widgets.forEach((child, index) => {
-            if (!notebook.isSelectedOrActive(child)) {
-                return;
-            }
-            if (child.model.type !== value) {
-                const cell = child.model.toJSON();
-                let newCell: ICellModel;
-
-                switch (value) {
-                    case 'code':
-                        newCell = model.contentFactory.createCodeCell({ cell });
-                        break;
-                    case 'markdown':
-                        newCell = model.contentFactory.createMarkdownCell({ cell });
-                        if (child.model.type === 'code') {
-                            newCell.trusted = false;
-                        }
-                        break;
-                    default:
-                        newCell = model.contentFactory.createRawCell({ cell });
-                        if (child.model.type === 'code') {
-                            newCell.trusted = false;
-                        }
-                }
-                cells.set(index, newCell);
-            }
-            if (value === 'markdown') {
-                // Fetch the new widget and unrender it.
-                child = notebook.widgets[index];
-                (child as MarkdownCell).rendered = false;
-            }
-        });
-        cells.endCompoundOperation();
-        notebook.deselectAll();
-    }
-
-    /**
-     * Delete the selected cells.
-     *
-     * @param notebook - The target notebook widget.
-     *
-     * #### Notes
-     * The cell after the last selected cell will be activated.
-     * If the last cell is deleted, then the previous one will be activated.
-     * It will add a code cell if all cells are deleted.
-     * This action can be undone.
-     */
-    export function deleteCells(notebook: Notebook): void {
-        const model = notebook.model!;
-        const cells = model.cells;
-        const toDelete: number[] = [];
-
-        notebook.mode = 'command';
-
-        // Find the cells to delete.
-        notebook.widgets.forEach((child, index) => {
-            const deletable = child.model.metadata.get('deletable') !== false;
-
-            if (notebook.isSelectedOrActive(child) && deletable) {
-                toDelete.push(index);
-                model.deletedCells.push(child.model.id);
-            }
-        });
-
-        // If cells are not deletable, we may not have anything to delete.
-        if (toDelete.length > 0) {
-            // Delete the cells as one undo event.
-            cells.beginCompoundOperation();
-            // Delete cells in reverse order to maintain the correct indices.
-            toDelete.reverse().forEach(index => {
-                cells.remove(index);
-            });
-            // Add a new cell if the notebook is empty. This is done
-            // within the compound operation to make the deletion of
-            // a notebook's last cell undoable.
-            if (!cells.length) {
-                cells.push(
-                    model.contentFactory.createCell(
-                        notebook.notebookConfig.defaultCell,
-                        {}
-                    )
-                );
-            }
-            cells.endCompoundOperation();
-
-            // Select the *first* interior cell not deleted or the cell
-            // *after* the last selected cell.
-            // Note: The activeCellIndex is clamped to the available cells,
-            // so if the last cell is deleted the previous cell will be activated.
-            // The *first* index is the index of the last cell in the initial
-            // toDelete list due to the `reverse` operation above.
-            notebook.activeCellIndex = toDelete[0] - toDelete.length + 1;
-        }
-
-        // Deselect any remaining, undeletable cells. Do this even if we don't
-        // delete anything so that users are aware *something* happened.
-        notebook.deselectAll();
-    }
-
-    /**
-     * Set the markdown header level of a cell.
-     */
-    export function setMarkdownHeader(cell: ICellModel, level: number) {
-        // Remove existing header or leading white space.
-        let source = cell.value.text;
-        const regex = /^(#+\s*)|^(\s*)/;
-        const newHeader = Array(level + 1).join('#') + ' ';
-        const matches = regex.exec(source);
-
-        if (matches) {
-            source = source.slice(matches[0].length);
-        }
-        cell.value.text = newHeader + source;
     }
 }
