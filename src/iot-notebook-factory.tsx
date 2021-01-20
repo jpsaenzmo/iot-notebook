@@ -8,7 +8,7 @@ import {
     INotebookTracker,
     NotebookPanel,
     NotebookActions,
-    Notebook,
+    Notebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -23,9 +23,14 @@ import { CommandRegistry } from '@lumino/commands';
 
 import { ReadonlyPartialJSONObject } from '@lumino/coreutils';
 
-import { ReactWidget, ISessionContext, Dialog, showDialog } from '@jupyterlab/apputils';
+import {
+    ReactWidget,
+    ISessionContext,
+    Dialog,
+    showDialog
+} from '@jupyterlab/apputils';
 
-import { each, toArray } from '@lumino/algorithm';
+import { each, toArray, ArrayExt } from '@lumino/algorithm';
 
 import { Signal } from '@lumino/signaling';
 
@@ -35,7 +40,6 @@ import { nullTranslator, ITranslator } from '@jupyterlab/translation';
 
 import { KernelMessage } from '@jupyterlab/services';
 
-import { ArrayExt } from '@lumino/algorithm';
 import { IoTToolbar } from './iot-notebook-toolbar';
 
 /**
@@ -192,6 +196,11 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     */
     private isLinked: boolean;
 
+    /**
+    * Whether or not the Arduino board is connected.
+    */
+    private isBoardConnected: boolean;
+
     private readonly commands: CommandRegistry;
 
     /**
@@ -203,10 +212,13 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.commands = commands;
         this.isPrerequisite = false;
         this.isLinked = false;
+        this.isBoardConnected = false;
     }
 
-    _logMessage(): void {
-        console.log('Arduino board connected vamoos!');
+    _notifyBoardConnection(): void {
+        this.isBoardConnected = true;
+        this.update();
+        console.log('isBoardConnected: ' + this.isBoardConnected);
     }
 
     changeIsPrerequisite(prerequisite: boolean) {
@@ -237,6 +249,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
+                    disabled={!this.isBoardConnected}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell');
@@ -281,7 +294,7 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
      */
     createCellFooter(): ICellFooter {
         const footer = new CellFooterWithButton(this.commands);
-        this._toolbar.stateChanged.connect(footer._logMessage, this);
+        this._toolbar.stateChanged.connect(footer._notifyBoardConnection, footer);
         return footer;
     }
 

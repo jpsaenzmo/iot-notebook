@@ -64,7 +64,6 @@ const iotfactory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
   autoStart: true,
   activate: (app: JupyterFrontEnd) => {
     console.log('JupyterLab extension iot-notebook:factory is activated!');
-
     const { commands } = app;
     return new IoTNotebookContentFactory(commands, toolbar);
   }
@@ -72,14 +71,13 @@ const iotfactory: JupyterFrontEndPlugin<NotebookPanel.IContentFactory> = {
 
 /**
  * The footer button extension for the IoT Code Cell.
-
+ */
 const iotcellfooter: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:cellfooter',
   requires: [INotebookTracker],
   autoStart: true,
   activate: activateCommands
 };
- */
 
 /**
  * Initialization data for the iot-notebook:toolbar extension.
@@ -87,9 +85,7 @@ const iotcellfooter: JupyterFrontEndPlugin<void> = {
 const iottoolbar: JupyterFrontEndPlugin<void> = {
   id: 'iot-notebook:toolbar',
   autoStart: true,
-  requires: [INotebookTracker],
   activate: (app: JupyterFrontEnd) => {
-    activateCommands
     console.log('JupyterLab extension iot-notebook:toolbar is activated!');
     app.docRegistry.addWidgetExtension('Notebook', toolbar);
   }
@@ -102,7 +98,7 @@ const plugins: Array<JupyterFrontEndPlugin<any>> = [
   iotsidebar,
   iotfactory,
   iottoolbar,
-  //iotcellfooter
+  iotcellfooter
 ];
 
 export default plugins;
