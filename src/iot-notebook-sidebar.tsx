@@ -6,13 +6,11 @@ import { FileBrowserModel } from '@jupyterlab/filebrowser';
 
 import { toArray } from '@lumino/algorithm';
 
-import { Contents } from '@jupyterlab/services';
-
-import { iotIcon } from './index';
-
-import { ContentsManager } from '@jupyterlab/services';
+import { Contents, ContentsManager } from '@jupyterlab/services';
 
 import { JupyterFrontEnd } from '@jupyterlab/application';
+
+import { iotIcon } from './index';
 
 /**
  * The class name added to a running widget.
@@ -161,7 +159,7 @@ class IoTNotebooksComponent extends React.Component<IIoTNotebookProps, IIoTNoteb
         return (
             <>
                 <div className={HEADER_CLASS}>{
-                    <ToolbarButtonComponent/>
+                    <ToolbarButtonComponent />
                 }
                 </div>
                 {toArray(ARCHITECTURAL_ELEMENTS_LBL).map((element, index) => (

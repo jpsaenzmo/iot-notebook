@@ -5,7 +5,9 @@ import {
 } from '@jupyterlab/docregistry';
 
 import {
-  NotebookPanel, INotebookModel
+  NotebookPanel,
+  INotebookModel,
+  Notebook
 } from '@jupyterlab/notebook';
 
 import {
@@ -34,11 +36,9 @@ import {
 
 import { IOutput } from '@jupyterlab/nbformat';
 
-import { Kernel } from '@jupyterlab/services';
+import { Kernel, KernelMessage } from '@jupyterlab/services';
 
 import { ISignal, Signal } from '@lumino/signaling';
-
-import { Notebook } from '@jupyterlab/notebook';
 
 export const board = new LabIcon({
   name: 'defaultpkg:board',
@@ -49,8 +49,6 @@ export const boardOff = new LabIcon({
   name: 'defaultpkg:board-off',
   svgstr: boardOffIconSvgStr
 });
-
-import { KernelMessage } from '@jupyterlab/services';
 
 import boardIconSvgStr from '../style/icons/board.svg';
 import boardOffIconSvgStr from '../style/icons/board-off.svg';
@@ -65,21 +63,19 @@ const IOTTOOLBAR_ARCHITECTURAL_CLASS = 'jp-Notebook-toolbarCellType';
  */
 const IOTTOOLBAR_ARCHITECTURAL_DROPDOWN_CLASS = 'jp-Notebook-toolbarCellTypeDropdown';
 
-const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
-
-const ARDUINO_BOARD_KEY = 'arduino_board';
-
 /**
  * The class name added to toolbar kernel name text.
  */
 const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 
+const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
+
+const ARDUINO_BOARD_KEY = 'arduino_board';
+
 /**
  * A notebook widget extension that adds a button to the toolbar.
  */
 export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPanel, INotebookModel> {
-
-
 
   /**
    * Create a new extension object.
@@ -93,7 +89,6 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
 
     let switchIoT = new IoTArchitecturalSwitch(panel.content);
 
-
     let boardConn = new BoardConnector(panel.sessionContext, panel.content);
     boardConn.stateChanged.connect(this._logMessage, this);
 
@@ -106,8 +101,9 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
     });
   }
 
-  private _logMessage(): void {
-    this._stateChanged.emit('hola');
+  private _logMessage(emitter: BoardConnector, board: String): void {
+    console.log('Hey, a Signal has been received from', emitter);
+    this._stateChanged.emit(board);
   }
 
   public get stateChanged(): ISignal<this, String> {
@@ -142,16 +138,15 @@ export class BoardConnector extends ReactWidget {
       }).then(value => {
         this._board = value.value.split('\t')[3];
         this._notebook.model.metadata.set(ARDUINO_BOARD_KEY, value.value.split('\t')[0]);
-        this._stateChanged.emit(this._board);
+        this._stateChanged.emit(value.value.split('\t')[0]);
       });
     }
     else {
       const buttons = [
         Dialog.okButton({ label: 'Ok' })
       ];
-      console.log("Paila, no hay ninguna board conectada");
       const dialog = new Dialog({
-        title: 'Paila, no hay ninguna board conectada',
+        title: "Couldn't find an Arduino Board",
         buttons
       }
       );

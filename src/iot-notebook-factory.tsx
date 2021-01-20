@@ -82,6 +82,7 @@ export function activateCommands(
             label: 'Run Cell',
             execute: args => {
                 const current = getCurrent(args);
+                console.log(args['board']);
 
                 if (current) {
                     const { context, content } = current;
@@ -95,6 +96,8 @@ export function activateCommands(
             label: 'Run Linked Cell',
             execute: args => {
                 const current = getCurrent(args);
+                console.log(args['board']);
+
                 if (current) {
                     const { context, content } = current;
 
@@ -201,6 +204,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     */
     private isBoardConnected: boolean;
 
+    private board: String;
+
     private readonly commands: CommandRegistry;
 
     /**
@@ -213,12 +218,13 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isPrerequisite = false;
         this.isLinked = false;
         this.isBoardConnected = false;
+        this.board;
     }
 
-    _notifyBoardConnection(): void {
+    _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
         this.isBoardConnected = true;
+        this.board = board;
         this.update();
-        console.log('isBoardConnected: ' + this.isBoardConnected);
     }
 
     changeIsPrerequisite(prerequisite: boolean) {
@@ -252,10 +258,11 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     disabled={!this.isBoardConnected}
                     onClick={event => {
                         if (!this.isLinked) {
-                            this.commands.execute('run-selected-codecell');
+
+                            this.commands.execute('run-selected-codecell', { board: this.board + '' });
                         }
                         else {
-                            this.commands.execute('run-linked-selected-codecell');
+                            this.commands.execute('run-linked-selected-codecell', { board: this.board + '' });
                         }
                     }}
                 >
