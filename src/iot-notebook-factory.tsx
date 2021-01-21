@@ -82,10 +82,18 @@ export function activateCommands(
             label: 'Run Cell',
             execute: args => {
                 const current = getCurrent(args);
-                console.log(args['board']);
-
                 if (current) {
                     const { context, content } = current;
+                    if (args['board'] != null) {
+                        console.log(args['board']);
+                        const activeIndex = content.activeCellIndex;
+
+                        var cellValue = content.model.cells.get(activeIndex).value.text;
+                        content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
+                    }
+                    else {
+
+                    }
                     NotebookActions.run(content, context.sessionContext);
                 }
             },
@@ -146,7 +154,6 @@ export function activateCommands(
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set(IS_LINKED, args.state);
-
                     content.update();
                 }
             },
@@ -258,7 +265,6 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     disabled={!this.isBoardConnected}
                     onClick={event => {
                         if (!this.isLinked) {
-
                             this.commands.execute('run-selected-codecell', { board: this.board + '' });
                         }
                         else {
