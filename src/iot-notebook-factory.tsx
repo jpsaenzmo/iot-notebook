@@ -89,7 +89,8 @@ export function activateCommands(
                         const activeIndex = content.activeCellIndex;
 
                         var cellValue = content.model.cells.get(activeIndex).value.text;
-                        content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
+                        content.model.cells.get(activeIndex).value.text = cellValue;
+                        // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
                     }
                     else {
 
