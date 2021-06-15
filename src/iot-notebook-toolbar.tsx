@@ -102,15 +102,21 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
   }
 
   private _logMessage(emitter: BoardConnector, board: String): void {
-    console.log('Hey, a Signal has been received from', emitter);
+    //console.log('Hey, a Signal has been received from', emitter);
     this._stateChanged.emit(board);
+    
   }
 
   public get stateChanged(): ISignal<this, String> {
     return this._stateChanged;
   }
 
+  public get kernelChanged(): ISignal<this, String> {
+    return this._kernelChanged;
+  }
+
   private _stateChanged = new Signal<this, String>(this);
+  private _kernelChanged = new Signal<this, String>(this);
 }
 
 export class BoardConnector extends ReactWidget {
@@ -131,13 +137,14 @@ export class BoardConnector extends ReactWidget {
   private callback = () => {
     this._kernelModel.execute('arduino-cli board list');
     if (this._kernelModel.boardList != null) {
-      console.log(this._kernelModel.boardList);
+      // console.log(this._kernelModel.boardList);
       return InputDialog.getItem({
         title: 'Pick an Arduino Board',
         items: this._kernelModel.boardList
       }).then(value => {
         this._board = value.value.split('\t')[3];
         this._notebook.model.metadata.set(ARDUINO_BOARD_KEY, value.value.split('\t')[0]);
+        // console.log('Kernel actual: ' + this._kernel);
         this._stateChanged.emit(value.value.split('\t')[0]);
       });
     }
@@ -159,6 +166,7 @@ export class BoardConnector extends ReactWidget {
   */
   private _onStatusChanged(sessionContext: ISessionContext) {
     this._kernel = sessionContext.kernelDisplayName;
+    this._stateChanged.emit('kernel' + this._kernel);
     this.update();
   }
 

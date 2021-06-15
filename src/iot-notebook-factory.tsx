@@ -214,6 +214,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     private board: String;
 
+    private kernel: String;
+
     private readonly commands: CommandRegistry;
 
     /**
@@ -226,13 +228,25 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isPrerequisite = false;
         this.isLinked = false;
         this.isBoardConnected = false;
+        this.kernel = '';
         this.board;
     }
 
     _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
-        this.isBoardConnected = true;
-        this.board = board;
-        this.update();
+        if (board.startsWith('kernel') && this.kernel != board) {
+            this.kernel = board.split('kernel')[1];
+            console.log('Entra a starts with' + this.kernel);
+            this.update();
+        }
+        else if (!board.startsWith('kernel')) {
+            this.isBoardConnected = true;
+            this.board = board;
+            this.update();
+        }
+    }
+
+    _notifyKernelChange(emitter: IoTToolbar, kernel: String): void {
+        this.kernel = kernel;
     }
 
     changeIsPrerequisite(prerequisite: boolean) {
@@ -263,7 +277,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
-                    disabled={!this.isBoardConnected}
+                    disabled={(this.board == 'Arduino' && this.isBoardConnected == false) || this.board != 'Arduino'}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell', { board: this.board + '' });
