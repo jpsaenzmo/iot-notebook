@@ -87,13 +87,28 @@ export function activateCommands(
                     //if (args['board'] != null) {
                     // console.log(args['board']);
                     const activeIndex = content.activeCellIndex;
+                    var tempNotebook: Notebook = content;
+                    tempNotebook.model.readOnly = false;
 
-                    var cellValue = content.model.cells.get(activeIndex).value.text;
-                    content.model.cells.get(activeIndex).value.text = cellValue;
-                    // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
-                    //}
+                    var mergedValue = tempNotebook.model.cells.get(activeIndex).value.text;
+                    var originalValue: string = tempNotebook.model.cells.get(activeIndex).value.text;
+
+                    for (var _i = activeIndex - 1; _i >= 0; _i--) {
+                        if (tempNotebook.model.cells.get(_i).type == 'code') {
+                            if (tempNotebook.model.cells.get(_i).metadata.get('is_prerequisite')) {
+                                mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                            }
+                        }
+                        var cellValue = content.model.cells.get(activeIndex).value.text;
+                        content.model.cells.get(activeIndex).value.text = cellValue;
+                        // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
+                        //}
+                    }
+                    tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
 
                     NotebookActions.run(content, context.sessionContext);
+                    content.model.cells.get(activeIndex).value.text = originalValue;
+                    content.update();
                 }
             },
             isEnabled
@@ -126,6 +141,7 @@ export function activateCommands(
                             }
                             else if (tempNotebook.model.cells.get(_i).metadata.get('is_prerequisite')) {
                                 mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                                stop = false;
                             }
                         }
                     }
@@ -279,14 +295,14 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     render() {
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
-                <input type="checkbox" id={"cb:prerequisite" + this.id} name="prerequisite" checked={this.isPrerequisite}
+                <input type="checkbox" id={"cb:prerequisite" + this.id} name={this.id} checked={this.isPrerequisite}
                     onChange={event => {
                         this.changeIsPrerequisite(!this.isPrerequisite);
                         this.commands.execute('set-as-prerequisite', { state: this.isPrerequisite });
                     }}
                 />
                 <label htmlFor={"cb:prerequisite" + this.id}>Is prerequisite</label><span />
-                <input type="checkbox" id={"cb:linked" + this.id} name="linked" checked={this.isLinked}
+                <input type="checkbox" id={"cb:linked" + this.id} name={this.id} checked={this.isLinked}
                     onChange={event => {
                         this.changeIsLinked(!this.isLinked);
                         this.commands.execute('set-as-linked', { state: this.isLinked });
