@@ -117,15 +117,16 @@ export function activateCommands(
                     var mergedValue = '';
                     var originalValue: string = tempNotebook.model.cells.get(activeIndex).value.text;
 
-                    var stop = false
+                    var stop = false;
                     for (var _i = activeIndex; _i >= 0 && !stop; _i--) {
-                        mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
-                        if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
-                            stop = true;
-                        };
+                        if (tempNotebook.model.cells.get(_i).type == 'code') {
+                            mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                            if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
+                                stop = true;
+                            };
+                        }
                     }
 
-                    console.log(mergedValue);
                     /*
                     toArray(tempNotebook.model.cells).forEach((cell, index) => {
                         mergedValue += cell.value.text;
