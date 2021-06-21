@@ -260,6 +260,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     }
 
     render() {
+        console.log(this.kernel + ' hola mundo ' + this.isBoardConnected);
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
                 <input type="checkbox" id="cb:prerequisite" name="prerequisite" checked={this.isPrerequisite}
@@ -277,7 +278,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
-                    disabled={(this.board == 'Arduino' && this.isBoardConnected == false) || this.board != 'Arduino'}
+                    disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell', { board: this.board + '' });
