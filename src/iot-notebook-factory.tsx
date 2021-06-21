@@ -93,10 +93,21 @@ export function activateCommands(
                     var mergedValue = tempNotebook.model.cells.get(activeIndex).value.text;
                     var originalValue: string = tempNotebook.model.cells.get(activeIndex).value.text;
 
+                    var previous = false;
+
                     for (var _i = activeIndex - 1; _i >= 0; _i--) {
                         if (tempNotebook.model.cells.get(_i).type == 'code') {
                             if (tempNotebook.model.cells.get(_i).metadata.get('is_prerequisite')) {
                                 mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                                if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell')) {
+                                    previous = true;
+                                }
+                            }
+                            else if (previous) {
+                                mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                                if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
+                                    previous = false;
+                                }
                             }
                         }
                         var cellValue = content.model.cells.get(activeIndex).value.text;
