@@ -84,17 +84,15 @@ export function activateCommands(
                 const current = getCurrent(args);
                 if (current) {
                     const { context, content } = current;
-                    if (args['board'] != null) {
-                        // console.log(args['board']);
-                        const activeIndex = content.activeCellIndex;
+                    //if (args['board'] != null) {
+                    // console.log(args['board']);
+                    const activeIndex = content.activeCellIndex;
 
-                        var cellValue = content.model.cells.get(activeIndex).value.text;
-                        content.model.cells.get(activeIndex).value.text = cellValue;
-                        // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
-                    }
-                    else {
+                    var cellValue = content.model.cells.get(activeIndex).value.text;
+                    content.model.cells.get(activeIndex).value.text = cellValue;
+                    // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
+                    //}
 
-                    }
                     NotebookActions.run(content, context.sessionContext);
                 }
             },
@@ -118,12 +116,17 @@ export function activateCommands(
                     var originalValue: string = tempNotebook.model.cells.get(activeIndex).value.text;
 
                     var stop = false;
-                    for (var _i = activeIndex; _i >= 0 && !stop; _i--) {
+                    for (var _i = activeIndex; _i >= 0; _i--) {
                         if (tempNotebook.model.cells.get(_i).type == 'code') {
-                            mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
-                            if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
-                                stop = true;
-                            };
+                            if (!stop) {
+                                mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                                if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
+                                    stop = true;
+                                };
+                            }
+                            else if (tempNotebook.model.cells.get(_i).metadata.get('is_prerequisite')) {
+                                mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                            }
                         }
                     }
 
@@ -274,22 +277,21 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     }
 
     render() {
-        // console.log(this.kernel + ' hola mundo ' + this.isBoardConnected);
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
-                <input type="checkbox" id="cb:prerequisite" name="prerequisite" checked={this.isPrerequisite}
+                <input type="checkbox" id={"cb:prerequisite" + this.id} name="prerequisite" checked={this.isPrerequisite}
                     onChange={event => {
                         this.changeIsPrerequisite(!this.isPrerequisite);
                         this.commands.execute('set-as-prerequisite', { state: this.isPrerequisite });
                     }}
                 />
-                <label htmlFor="cb:prerequisite">Is prerequisite</label><span />
-                <input type="checkbox" id="cb:linked" name="linked" checked={this.isLinked}
+                <label htmlFor={"cb:prerequisite" + this.id}>Is prerequisite</label><span />
+                <input type="checkbox" id={"cb:linked" + this.id} name="linked" checked={this.isLinked}
                     onChange={event => {
                         this.changeIsLinked(!this.isLinked);
                         this.commands.execute('set-as-linked', { state: this.isLinked });
                     }} />
-                <label htmlFor="cb:linked">Execute together with the previous cell</label><br />
+                <label htmlFor={"cb:linked" + this.id}>Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
@@ -350,6 +352,7 @@ export class IoTNotebookContentFactory extends NotebookPanel.ContentFactory {
 class IoTNotebook extends Notebook {
 
     onActivateRequest() {
+        var iden = 0;
         each(this.widgets, widget => {
             const widgetModel = widget.model;
             if (widgetModel.type === 'code' && (widgetModel.metadata.get(IS_PREREQUISITE) != null || widgetModel.metadata.get(IS_LINKED) != null)) {
@@ -360,6 +363,12 @@ class IoTNotebook extends Notebook {
                 footer.changeIsPrerequisite(isPrerequisite);
                 footer.changeIsLinked(isLinked);
             }
+            if (widgetModel.type === 'code') {
+                const childrens = toArray(widget.children());
+                const footer = childrens[3] as CellFooterWithButton;
+                footer.id = iden + '';
+            }
+            iden++;
         });
     }
 }
