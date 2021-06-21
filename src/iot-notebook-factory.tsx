@@ -85,7 +85,7 @@ export function activateCommands(
                 if (current) {
                     const { context, content } = current;
                     if (args['board'] != null) {
-                        console.log(args['board']);
+                        // console.log(args['board']);
                         const activeIndex = content.activeCellIndex;
 
                         var cellValue = content.model.cells.get(activeIndex).value.text;
@@ -105,7 +105,7 @@ export function activateCommands(
             label: 'Run Linked Cell',
             execute: args => {
                 const current = getCurrent(args);
-                console.log(args['board']);
+                // console.log(args['board']);
 
                 if (current) {
                     const { context, content } = current;
@@ -117,6 +117,16 @@ export function activateCommands(
                     var mergedValue = '';
                     var originalValue: string = tempNotebook.model.cells.get(activeIndex).value.text;
 
+                    var stop = false
+                    for (var _i = activeIndex; _i >= 0 && !stop; _i--) {
+                        mergedValue = tempNotebook.model.cells.get(_i).value.text + '\n' + mergedValue;
+                        if (tempNotebook.model.cells.get(_i).metadata.get('is_linked_previous_cell') != true) {
+                            stop = true;
+                        };
+                    }
+
+                    console.log(mergedValue);
+                    /*
                     toArray(tempNotebook.model.cells).forEach((cell, index) => {
                         mergedValue += cell.value.text;
                         if (index < activeIndex) {
@@ -126,6 +136,9 @@ export function activateCommands(
                             cell.value.text = mergedValue;
                         }
                     });
+                    */
+                    tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
+
                     run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -235,7 +248,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
         if (board.startsWith('kernel') && this.kernel != board) {
             this.kernel = board.split('kernel')[1];
-            console.log('Entra a starts with' + this.kernel);
+            // console.log('Entra a starts with' + this.kernel);
             this.update();
         }
         else if (!board.startsWith('kernel')) {
@@ -260,7 +273,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     }
 
     render() {
-        console.log(this.kernel + ' hola mundo ' + this.isBoardConnected);
+        // console.log(this.kernel + ' hola mundo ' + this.isBoardConnected);
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
                 <input type="checkbox" id="cb:prerequisite" name="prerequisite" checked={this.isPrerequisite}
@@ -289,7 +302,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     }}
                 >
                     run
-          </button>
+                </button>
             </div>
         );
     }
