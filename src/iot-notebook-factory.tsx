@@ -84,8 +84,7 @@ export function activateCommands(
                 const current = getCurrent(args);
                 if (current) {
                     const { context, content } = current;
-                    //if (args['board'] != null) {
-                    // console.log(args['board']);
+
                     const activeIndex = content.activeCellIndex;
                     var tempNotebook: Notebook = content;
                     tempNotebook.model.readOnly = false;
@@ -112,8 +111,6 @@ export function activateCommands(
                         }
                         var cellValue = content.model.cells.get(activeIndex).value.text;
                         content.model.cells.get(activeIndex).value.text = cellValue;
-                        // content.model.cells.get(activeIndex).value.text = args['board'] + '/n' + cellValue;
-                        //}
                     }
                     tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
 
@@ -129,7 +126,6 @@ export function activateCommands(
             label: 'Run Linked Cell',
             execute: args => {
                 const current = getCurrent(args);
-                // console.log(args['board']);
 
                 if (current) {
                     const { context, content } = current;
@@ -157,17 +153,6 @@ export function activateCommands(
                         }
                     }
 
-                    /*
-                    toArray(tempNotebook.model.cells).forEach((cell, index) => {
-                        mergedValue += cell.value.text;
-                        if (index < activeIndex) {
-                            mergedValue += '\n';
-                        }
-                        else if (index == activeIndex) {
-                            cell.value.text = mergedValue;
-                        }
-                    });
-                    */
                     tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
 
                     run(content, context.sessionContext);
@@ -256,6 +241,16 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     */
     private isBoardConnected: boolean;
 
+    /**
+    * Whether or not the code in the cell corresponds to the Arduino setup method.
+    */
+    private isSetup: boolean;
+
+    /**
+    * Whether or not the code in the cell corresponds to the Arduino setup method.
+    */
+    private isLoop: boolean;
+
     private board: String;
 
     private kernel: String;
@@ -272,6 +267,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isPrerequisite = false;
         this.isLinked = false;
         this.isBoardConnected = false;
+        this.isSetup = false;
+        this.isLoop = false;
         this.kernel = '';
         this.board;
     }
@@ -279,7 +276,6 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
         if (board.startsWith('kernel') && this.kernel != board) {
             this.kernel = board.split('kernel')[1];
-            // console.log('Entra a starts with' + this.kernel);
             this.update();
         }
         else if (!board.startsWith('kernel')) {
@@ -306,19 +302,33 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     render() {
         return (
             <div className={CELL_FOOTER_DIV_CLASS}>
-                <input type="checkbox" id={"cb:prerequisite" + this.id} name={this.id} checked={this.isPrerequisite}
+                <input hidden={true} type="radio" id={"rd:setup" + this.id} name={this.id} checked={this.isSetup}
+                    onChange={event => {
+                        this.changeIsPrerequisite(!this.isSetup);
+                        this.commands.execute('set-as-prerequisite', { state: this.isSetup });
+                    }}
+                />
+                <label hidden={true} htmlFor={"rd:setup" + this.id}>Setup</label><span />
+                <input hidden={true} type="radio" id={"rd:loop" + this.id} name={this.id} checked={this.isLoop}
+                    onChange={event => {
+                        this.changeIsLinked(!this.isLoop);
+                        this.commands.execute('set-as-linked', { state: this.isLoop });
+                    }} />
+                <label hidden={true} htmlFor={"rd:loop" + this.id}>Loop</label>
+
+                <input hidden={false} type="checkbox" id={"cb:prerequisite" + this.id} name={this.id} checked={this.isPrerequisite}
                     onChange={event => {
                         this.changeIsPrerequisite(!this.isPrerequisite);
                         this.commands.execute('set-as-prerequisite', { state: this.isPrerequisite });
                     }}
                 />
-                <label htmlFor={"cb:prerequisite" + this.id}>Is prerequisite</label><span />
-                <input type="checkbox" id={"cb:linked" + this.id} name={this.id} checked={this.isLinked}
+                <label hidden={false} htmlFor={"cb:prerequisite" + this.id}>Is prerequisite</label><span />
+                <input hidden={false} type="checkbox" id={"cb:linked" + this.id} name={this.id} checked={this.isLinked}
                     onChange={event => {
                         this.changeIsLinked(!this.isLinked);
                         this.commands.execute('set-as-linked', { state: this.isLinked });
                     }} />
-                <label htmlFor={"cb:linked" + this.id}>Execute together with the previous cell</label><br />
+                <label hidden={false} htmlFor={"cb:linked" + this.id}>Execute together with the previous cell</label><br />
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
