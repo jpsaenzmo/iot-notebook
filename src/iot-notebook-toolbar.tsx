@@ -70,7 +70,7 @@ const TOOLBAR_KERNEL_NAME_CLASS = 'jp-Toolbar-kernelName';
 
 const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
 
-const ARDUINO_BOARD_KEY = 'arduino_board';
+const ARDUINO_FQBN = 'arduino_fqbn';
 
 /**
  * A notebook widget extension that adds a button to the toolbar.
@@ -102,9 +102,7 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
   }
 
   private _logMessage(emitter: BoardConnector, board: String): void {
-    //console.log('Hey, a Signal has been received from', emitter);
     this._stateChanged.emit(board);
-    
   }
 
   public get stateChanged(): ISignal<this, String> {
@@ -122,7 +120,7 @@ export class IoTToolbar implements DocumentRegistry.IWidgetExtension<NotebookPan
 export class BoardConnector extends ReactWidget {
   constructor(sessionContext: ISessionContext, widget: Notebook) {
     super();
-    this._board = 'Board'
+    this._fqbn = 'Board'
     this.addClass(TOOLBAR_KERNEL_NAME_CLASS);
     this._onStatusChanged(sessionContext);
     sessionContext.statusChanged.connect(this._onStatusChanged, this);
@@ -137,14 +135,14 @@ export class BoardConnector extends ReactWidget {
   private callback = () => {
     this._kernelModel.execute('arduino-cli board list');
     if (this._kernelModel.boardList != null) {
-      // console.log(this._kernelModel.boardList);
+
       return InputDialog.getItem({
         title: 'Pick an Arduino Board',
         items: this._kernelModel.boardList
       }).then(value => {
-        this._board = value.value.split('\t')[3];
-        this._notebook.model.metadata.set(ARDUINO_BOARD_KEY, value.value.split('\t')[0]);
-        // console.log('Kernel actual: ' + this._kernel);
+        this._fqbn = value.value.split('\t')[3];
+        this._notebook.model.metadata.set(ARDUINO_FQBN, value.value.split('\t')[0]);
+
         this._stateChanged.emit(value.value.split('\t')[0]);
       });
     }
@@ -177,7 +175,7 @@ export class BoardConnector extends ReactWidget {
           <ToolbarButtonComponent
             onClick={this.callback}
             tooltip={'Connect to an Arduino board'}
-            label={this._board}
+            label={this._fqbn}
           />
           <boardOff.react stylesheet={'toolbarButton'} alignSelf={'normal'} height={'24px'} />
         </>)
@@ -192,7 +190,7 @@ export class BoardConnector extends ReactWidget {
   }
 
   private _kernel: string;
-  private _board: string;
+  private _fqbn: string;
 
   private _kernelModel: KernelModel;
   private _notebook: Notebook;

@@ -82,6 +82,7 @@ export function activateCommands(
             label: 'Run Cell',
             execute: args => {
                 const current = getCurrent(args);
+
                 if (current) {
                     const { context, content } = current;
 
@@ -109,11 +110,8 @@ export function activateCommands(
                                 }
                             }
                         }
-                        var cellValue = content.model.cells.get(activeIndex).value.text;
-                        content.model.cells.get(activeIndex).value.text = cellValue;
                     }
-                    tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
-
+                    tempNotebook.model.cells.get(activeIndex).value.text = args.board != 'undefined' ? args.board + '\n' + mergedValue : mergedValue;
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -152,10 +150,8 @@ export function activateCommands(
                             }
                         }
                     }
-
                     tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
-
-                    run(content, context.sessionContext);
+                    NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
                 }
@@ -251,7 +247,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     */
     private isLoop: boolean;
 
-    private board: String;
+    private fqbn: String;
 
     private kernel: String;
 
@@ -270,7 +266,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isSetup = false;
         this.isLoop = false;
         this.kernel = '';
-        this.board;
+        this.fqbn;
     }
 
     _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
@@ -280,7 +276,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         }
         else if (!board.startsWith('kernel')) {
             this.isBoardConnected = true;
-            this.board = board;
+            this.fqbn = board;
             this.update();
         }
     }
@@ -334,10 +330,10 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
                     onClick={event => {
                         if (!this.isLinked) {
-                            this.commands.execute('run-selected-codecell', { board: this.board + '' });
+                            this.commands.execute('run-selected-codecell', { board: this.fqbn + '' });
                         }
                         else {
-                            this.commands.execute('run-linked-selected-codecell', { board: this.board + '' });
+                            this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '' });
                         }
                     }}
                 >
