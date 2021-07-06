@@ -328,6 +328,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
+                    hidden={this.isPrerequisite == true}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell', { board: this.fqbn + '' });
