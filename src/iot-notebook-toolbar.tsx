@@ -72,6 +72,8 @@ const ARCHITECTURAL_ELEMENT_KEY = 'architectural_element';
 
 const ARDUINO_FQBN = 'arduino_fqbn';
 
+const ARDUINO_PORT = 'arduino_port';
+
 /**
  * A notebook widget extension that adds a button to the toolbar.
  */
@@ -142,8 +144,9 @@ export class BoardConnector extends ReactWidget {
       }).then(value => {
         this._fqbn = value.value.split('\t')[3];
         this._notebook.model.metadata.set(ARDUINO_FQBN, value.value.split('\t')[0]);
+        this._notebook.model.metadata.set(ARDUINO_PORT, value.value.split('\t')[1]);
 
-        this._stateChanged.emit(value.value.split('\t')[0]);
+        this._stateChanged.emit(value.value.split('\t')[0] + " " + value.value.split('\t')[1]);
       });
     }
     else {

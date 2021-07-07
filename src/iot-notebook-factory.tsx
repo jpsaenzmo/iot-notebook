@@ -111,7 +111,15 @@ export function activateCommands(
                             }
                         }
                     }
-                    tempNotebook.model.cells.get(activeIndex).value.text = args.board != 'undefined' ? args.board + '\n' + mergedValue : mergedValue;
+                    if (args.port != 'undefined') {
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'port:' + args.port + '\n' + 'board:' + args.board + '\n' + mergedValue;
+                    }
+                    else if (args.board != 'undefined') {
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'board:' + args.board + '\n' + mergedValue;
+                    }
+                    else {
+                        tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
+                    }
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -249,6 +257,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     private fqbn: String;
 
+    private port: String;
+
     private kernel: String;
 
     private readonly commands: CommandRegistry;
@@ -267,6 +277,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.isLoop = false;
         this.kernel = '';
         this.fqbn;
+        this.port;
     }
 
     _notifyBoardConnection(emitter: IoTToolbar, board: String): void {
@@ -276,7 +287,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         }
         else if (!board.startsWith('kernel')) {
             this.isBoardConnected = true;
-            this.fqbn = board;
+            this.fqbn = board.split(" ")[0];
+            this.port = board.split(" ")[1];
             this.update();
         }
     }
@@ -328,13 +340,29 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
-                    hidden={this.isPrerequisite == true}
+                    hidden={this.isPrerequisite == true || this.kernel != 'Arduino'}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell', { board: this.fqbn + '' });
                         }
                         else {
                             this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '' });
+                        }
+                    }}
+                >
+                    verify
+                </button>
+                <span />
+                <button
+                    className={CELL_FOOTER_BUTTON_CLASS}
+                    disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
+                    hidden={this.isPrerequisite == true}
+                    onClick={event => {
+                        if (!this.isLinked) {
+                            this.commands.execute('run-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
+                        }
+                        else {
+                            this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
                         }
                     }}
                 >

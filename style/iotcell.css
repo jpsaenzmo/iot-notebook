@@ -19,6 +19,8 @@
 
   margin-left: auto;
   margin-right: 0px;
+
+  margin-left: 0.2rem;
 }
 
 .jp-Cell .iotcell-cellFooterBtn:active {
