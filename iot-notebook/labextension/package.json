@@ -28,7 +28,7 @@
     "url": "https://git.elite.polito.it/iot-notebook/iot-notebook.git"
   },
   "scripts": {
-    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build": "tsc",
     "build:prod": "jlpm run clean && jlpm run build:lib && jlpm run build:labextension",
     "build:labextension": "jupyter labextension build .",
     "build:lib": "tsc",
@@ -36,10 +36,8 @@
     "install-ext": "jupyter labextension install . --no-build",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
-    "install:extension": "jlpm run build",
     "prepare": "jlpm run clean && jlpm run build",
-    "watch": "tsc -w",
-    "watch:labextension": "jupyter labextension watch ."
+    "watch": "tsc -w"
   },
   "dependencies": {
     "@babel/runtime": "^7.13.8",
@@ -65,14 +63,11 @@
   ],
   "jupyterlab": {
     "extension": true,
-    "outputDir": "iot-notebook/labextension"
-  },
-  "jupyter-releaser": {
-    "hooks": {
-      "before-build-npm": [
-        "python -m pip install jupyterlab~=3.0",
-        "jlpm"
-      ]
+    "outputDir": "iot-notebook/labextension",
+    "_build": {
+      "load": "static\\remoteEntry.339c987fc989b06f6890.js",
+      "extension": "./extension",
+      "style": "./style"
     }
   }
 }
