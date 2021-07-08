@@ -491,13 +491,15 @@ class IoTNotebook extends Notebook {
         var iden = 0;
         each(this.widgets, widget => {
             const widgetModel = widget.model;
-            if (widgetModel.type === 'code' && (widgetModel.metadata.get(IS_PREREQUISITE) != null || widgetModel.metadata.get(IS_LINKED) != null)) {
+            if (widgetModel.type === 'code' && (widgetModel.metadata.get(IS_PREREQUISITE) != null || widgetModel.metadata.get(IS_LINKED) != null || widgetModel.metadata.get(IS_LIBRARY) != null)) {
                 const isPrerequisite = widgetModel.metadata.get(IS_PREREQUISITE) != null && widgetModel.metadata.get(IS_PREREQUISITE) == true ? true : false;
                 const isLinked = widgetModel.metadata.get(IS_LINKED) != null && widgetModel.metadata.get(IS_LINKED) == true ? true : false;
+                const isLibrary = widgetModel.metadata.get(IS_LIBRARY) != null && widgetModel.metadata.get(IS_LIBRARY) == true ? true : false;
                 const childrens = toArray(widget.children());
                 const footer = childrens[3] as CellFooterWithButton;
                 footer.changeIsPrerequisite(isPrerequisite);
                 footer.changeIsLinked(isLinked);
+                footer.changeIsLibrary(isLibrary);
             }
             if (widgetModel.type === 'code') {
                 const childrens = toArray(widget.children());
