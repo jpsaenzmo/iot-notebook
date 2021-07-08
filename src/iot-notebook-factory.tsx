@@ -51,6 +51,7 @@ const CELL_FOOTER_BUTTON_CLASS = 'iotcell-cellFooterBtn';
 
 const IS_PREREQUISITE = 'is_prerequisite'
 const IS_LINKED = 'is_linked_previous_cell'
+const IS_LIBRARY = 'is_library_installation'
 
 export function activateCommands(
     app: JupyterFrontEnd,
@@ -111,11 +112,11 @@ export function activateCommands(
                             }
                         }
                     }
-                    if (args.port != 'undefined') {
-                        tempNotebook.model.cells.get(activeIndex).value.text = 'port:' + args.port + '\n' + 'board:' + args.board + '\n' + mergedValue;
+                    if (args.port != 'undefined' && args.port != null) {
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'port%' + args.port + '\n' + 'board%' + args.board + '\n' + mergedValue;
                     }
                     else if (args.board != 'undefined') {
-                        tempNotebook.model.cells.get(activeIndex).value.text = 'board:' + args.board + '\n' + mergedValue;
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'board%' + args.board + '\n' + mergedValue;
                     }
                     else {
                         tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
@@ -167,6 +168,20 @@ export function activateCommands(
             isEnabled
         });
 
+        commands.addCommand('run-library-installation', {
+            label: 'Run Library Installation',
+            execute: args => {
+                const current = getCurrent(args);
+
+                if (current) {
+                    const { context, content } = current;
+                    NotebookActions.run(content, context.sessionContext);
+                    content.update();
+                }
+
+            }, isEnabled
+        });
+
         commands.addCommand('set-as-prerequisite', {
             label: 'Is prerequisite',
             execute: args => {
@@ -174,6 +189,9 @@ export function activateCommands(
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set(IS_PREREQUISITE, args.state);
+                    if (args.state == true) {
+                        content.activeCell.model.metadata.set(IS_LIBRARY, false);
+                    }
                     content.update();
                 }
             },
@@ -188,6 +206,27 @@ export function activateCommands(
                 if (current) {
                     const { content } = current;
                     content.activeCell.model.metadata.set(IS_LINKED, args.state);
+                    if (args.state == true) {
+                        content.activeCell.model.metadata.set(IS_LIBRARY, false);
+                    }
+                    content.update();
+                }
+            },
+            isEnabled
+        });
+
+        commands.addCommand('set-as-library', {
+            label: 'Is a library installation',
+            execute: args => {
+                const current = getCurrent(args);
+
+                if (current) {
+                    const { content } = current;
+                    content.activeCell.model.metadata.set(IS_LIBRARY, args.state);
+                    if (args.state == true) {
+                        content.activeCell.model.metadata.set(IS_PREREQUISITE, false);
+                        content.activeCell.model.metadata.set(IS_LINKED, false);
+                    }
                     content.update();
                 }
             },
@@ -255,6 +294,11 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
     */
     private isLoop: boolean;
 
+    /**
+    * Whether or not the code in the cell corresponds to the Arduino setup method.
+    */
+    private isLibrary: boolean;
+
     private fqbn: String;
 
     private port: String;
@@ -272,6 +316,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
         this.commands = commands;
         this.isPrerequisite = false;
         this.isLinked = false;
+        this.isLibrary = false;
         this.isBoardConnected = false;
         this.isSetup = false;
         this.isLoop = false;
@@ -289,6 +334,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
             this.isBoardConnected = true;
             this.fqbn = board.split(" ")[0];
             this.port = board.split(" ")[1];
+
             this.update();
         }
     }
@@ -299,11 +345,26 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     changeIsPrerequisite(prerequisite: boolean) {
         this.isPrerequisite = prerequisite;
+        if (this.isPrerequisite) {
+            this.isLibrary = false;
+        }
         this.update();
     }
 
     changeIsLinked(linked: boolean) {
         this.isLinked = linked;
+        if (this.isLinked) {
+            this.isLibrary = false;
+        }
+        this.update();
+    }
+
+    changeIsLibrary(library: boolean) {
+        this.isLibrary = library;
+        if (this.isLibrary) {
+            this.isPrerequisite = false;
+            this.isLinked = false;
+        }
         this.update();
     }
 
@@ -324,6 +385,14 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     }} />
                 <label hidden={true} htmlFor={"rd:loop" + this.id}>Loop</label>
 
+                <input hidden={this.kernel != 'Arduino'} type="checkbox" id={"cb:library" + this.id} name={this.id} checked={this.isLibrary}
+                    onChange={event => {
+                        this.changeIsLibrary(!this.isLibrary);
+                        this.commands.execute('set-as-library', { state: this.isLibrary });
+                    }}
+                />
+                <label hidden={this.kernel != 'Arduino'} htmlFor={"cb:library" + this.id}>Install library</label><span />
+
                 <input hidden={false} type="checkbox" id={"cb:prerequisite" + this.id} name={this.id} checked={this.isPrerequisite}
                     onChange={event => {
                         this.changeIsPrerequisite(!this.isPrerequisite);
@@ -340,7 +409,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                 <button
                     className={CELL_FOOTER_BUTTON_CLASS}
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
-                    hidden={this.isPrerequisite == true || this.kernel != 'Arduino'}
+                    hidden={this.isPrerequisite == true || this.kernel != 'Arduino' || this.isLibrary == true}
                     onClick={event => {
                         if (!this.isLinked) {
                             this.commands.execute('run-selected-codecell', { board: this.fqbn + '' });
@@ -358,11 +427,16 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
                     hidden={this.isPrerequisite == true}
                     onClick={event => {
-                        if (!this.isLinked) {
-                            this.commands.execute('run-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
+                        if (this.isLibrary) {
+                            this.commands.execute('run-library-installation');
                         }
                         else {
-                            this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
+                            if (!this.isLinked) {
+                                this.commands.execute('run-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
+                            }
+                            else {
+                                this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
+                            }
                         }
                     }}
                 >
