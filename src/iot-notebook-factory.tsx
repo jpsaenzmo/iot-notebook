@@ -121,6 +121,7 @@ export function activateCommands(
                     else {
                         tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
                     }
+                    console.log(tempNotebook.model.cells.get(activeIndex).value.text);
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -159,7 +160,17 @@ export function activateCommands(
                             }
                         }
                     }
-                    tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
+                    if (args.port != 'undefined' && args.port != null) {
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'port%' + args.port + '\n' + 'board%' + args.board + '\n' + mergedValue;
+                    }
+                    else if (args.board != 'undefined') {
+                        tempNotebook.model.cells.get(activeIndex).value.text = 'board%' + args.board + '\n' + mergedValue;
+                    }
+                    else {
+                        tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
+                    }
+                    // tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
+                    console.log(tempNotebook.model.cells.get(activeIndex).value.text);
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -345,7 +356,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     changeIsPrerequisite(prerequisite: boolean) {
         this.isPrerequisite = prerequisite;
-        if (this.isPrerequisite) {
+        if (prerequisite == true) {
             this.isLibrary = false;
         }
         this.update();
@@ -353,7 +364,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     changeIsLinked(linked: boolean) {
         this.isLinked = linked;
-        if (this.isLinked) {
+        if (linked == true) {
             this.isLibrary = false;
         }
         this.update();
@@ -361,7 +372,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
 
     changeIsLibrary(library: boolean) {
         this.isLibrary = library;
-        if (this.isLibrary) {
+        if (library == true) {
             this.isPrerequisite = false;
             this.isLinked = false;
         }
@@ -427,7 +438,8 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     disabled={this.kernel == 'Arduino' && this.isBoardConnected == false}
                     hidden={this.isPrerequisite == true}
                     onClick={event => {
-                        if (this.isLibrary) {
+                        if (this.isLibrary == true) {
+                            console.log("this.isLibrary");
                             this.commands.execute('run-library-installation');
                         }
                         else {
@@ -435,6 +447,7 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                                 this.commands.execute('run-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
                             }
                             else {
+                                console.log('Entras acá');
                                 this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
                             }
                         }
