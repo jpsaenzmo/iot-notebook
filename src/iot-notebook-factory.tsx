@@ -121,7 +121,7 @@ export function activateCommands(
                     else {
                         tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
                     }
-                    console.log(tempNotebook.model.cells.get(activeIndex).value.text);
+
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -169,8 +169,7 @@ export function activateCommands(
                     else {
                         tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
                     }
-                    // tempNotebook.model.cells.get(activeIndex).value.text = mergedValue;
-                    console.log(tempNotebook.model.cells.get(activeIndex).value.text);
+
                     NotebookActions.run(content, context.sessionContext);
                     content.model.cells.get(activeIndex).value.text = originalValue;
                     content.update();
@@ -439,7 +438,6 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                     hidden={this.isPrerequisite == true}
                     onClick={event => {
                         if (this.isLibrary == true) {
-                            console.log("this.isLibrary");
                             this.commands.execute('run-library-installation');
                         }
                         else {
@@ -447,7 +445,6 @@ class CellFooterWithButton extends ReactWidget implements ICellFooter {
                                 this.commands.execute('run-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
                             }
                             else {
-                                console.log('Entras acá');
                                 this.commands.execute('run-linked-selected-codecell', { board: this.fqbn + '', port: this.port + '' });
                             }
                         }
